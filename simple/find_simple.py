@@ -30,7 +30,7 @@ def find_simple_anisotropic_parallel(num, s, weights=range(2, Integer(27)/2), dy
     """
     simple = dict()
     for kk in weights:
-        simple[Integer(kk)] = list()
+        simple[kk] = list()
     m = round(RR(num) / s)
     args = [(m * a + lower, min(m * (a + lower), lower + num - 1),
                           lower + num - 1, None, None, weights, True, dynamic,

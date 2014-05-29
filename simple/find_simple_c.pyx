@@ -30,7 +30,7 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
     max_order = Integer(max_order) if max_order is not None else Integer(upper)
     k = Integer(2*k)/2 if k is not None else None
     if isinstance(weights, list):
-        weights = map(lambda x: Integer(x), weights)
+        weights = map(lambda x: Integer(2*x)/2, weights)
     elif k is None:
         raise ValueError("Either k or a list of half-integers for weights has to be provided as input.")
         
@@ -83,8 +83,7 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
                 # we try to apply the simpler check
                 if numpos >= 10 * len(weights):
                     usedyn = False
-                d = s.dimension_estimate_for_anisotropic(
-                    Integer(kk), usedyn and dynamic)
+                d = s.dimension_estimate_for_anisotropic(kk, usedyn and dynamic)
                 if d <= 0:
                     check = True # check exact dimension
                     numpos = 0
