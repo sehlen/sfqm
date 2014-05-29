@@ -7,8 +7,7 @@ from sage.parallel.decorate import *
 # Testing functions
 #########################################
 
-@parallel
-def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(4, 27), test_dim=True, dynamic=True, only_2_n=False, reduction=False):
+def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(2, Integer(27)/2), test_dim=True, dynamic=True, only_2_n=False, reduction=False):
     r"""
       ```find_simple_anisotropic``` computes a list of all anisotropic finite quadratic modules
       up to a given maximal order ```max_order``` that are $k$-simple for given weights.
@@ -117,49 +116,3 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
                 print "check but not test_dim", N
     if test_dim:
         return simple, walltime(t)
-
-
-cpdef _find_simple_anisotropic_parallel(num, s, weights=range(4, 27), dynamic=True, lower=1, only_2_n=False, reduction=False):
-    r"""
-      Test for anisotripic $k$-simple fqm's for $2k$ in weights.
-
-      INPUT::
-        - num: upper bound
-        - s: number of iterations
-        - lower: lower bound
-    """
-    simple = dict()
-    for kk in weights:
-        simple[Integer(kk) / 2] = list()
-    m = round(RR(num) / s)
-    args = [(m * a + lower, min(m * (a + lower), lower + num - 1),
-                          lower + num - 1, None, None, weights, True, dynamic,
-                          only_2_n, reduction) for a in range(s)]
-    tests = test_simple(args)
-    done = 0
-
-    #starttime = walltime()
-    for test in tests:
-        done += 1
-        simple_part = test[1][0]
-        if isinstance(simple_part, str):
-            print "Result: ", test
-            continue
-        tt = test[1][1]
-        for kk in simple_part.keys():
-            print "Result from process: ", simple_part[kk]
-            simple[kk] = uniq(simple[kk] + simple_part[kk])
-        #tt = walltime(starttime)
-        sl = [len(sp) for sp in simple.values()]
-        num_simple = sum(sl)
-        timeest = (s - done) * RR(tt) / RR(60)
-        if timeest > 1:
-            if timeest > 60:
-                print ("%g%% done, ETA: %d hour" + ("s" if timeest / 60 >= 2 else "") + ", %d minutes, simple lattices: %d") % (
-                    RR(done) / RR(s) * 100, timeest / 60, (timeest / 60).frac() * 60, num_simple)
-            else:
-                print ("%g%% done, ETA: %d minute" + ("s" if timeest >= 2 else "") +
-                       ", simple lattices: %d") % (RR(done) / RR(s) * 100, timeest, num_simple)
-        else:
-            print "%g%% done, ETA: %d seconds, simple lattices: %d" % (RR(done) / RR(s) * 100, timeest * 60, num_simple)
-    return simple
