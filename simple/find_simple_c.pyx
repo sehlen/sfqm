@@ -8,7 +8,7 @@ from sage.parallel.decorate import *
 #########################################
 
 @parallel
-def find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(4, 27), test_dim=True, dynamic=True, only_2_n=False, reduction=False):
+def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(4, 27), test_dim=True, dynamic=True, only_2_n=False, reduction=False):
     r"""
       ```find_simple_anisotropic``` computes a list of all anisotropic finite quadratic modules
       up to a given maximal order ```max_order``` that are $k$-simple for given weights.
@@ -119,7 +119,7 @@ def find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weig
         return simple, walltime(t)
 
 
-cpdef test_simple_parallel(num, s, weights=range(4, 27), dynamic=True, lower=1, only_2_n=False, reduction=False):
+cpdef _find_simple_anisotropic_parallel(num, s, weights=range(4, 27), dynamic=True, lower=1, only_2_n=False, reduction=False):
     r"""
       Test for anisotripic $k$-simple fqm's for $2k$ in weights.
 
