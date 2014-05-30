@@ -158,7 +158,7 @@ class GenusSymbol(object):
         if debug > 0:
             print "N={0}".format(N)
         for p in N.prime_factors():
-            c = self.jordan_component(p)
+            c = self.jordan_component(p)._symbol_dict[p][0]
             if len(c) == 1:
                 if len(c[0]) == 3:
                     if c[0][1] == 2:
@@ -192,7 +192,7 @@ class GenusSymbol(object):
         def eps_odd(d):
             dd = odd_part(d / gcd(d, q))
             a = kronecker(N / d, odd_part(dd))
-            sig = lambda p: self.jordan_component(p)[0][2]
+            sig = lambda p: self.jordan_component(p)._symbol_dict[p][0][2]
             a *= prod(sig(p) * kronecker(8, p) for p in dd.prime_factors())
             return a
 
@@ -220,8 +220,8 @@ class GenusSymbol(object):
             if s == 2:
                 if debug > 0:
                     print "s = 2"
-                t1 = self.jordan_component(2)[0][4]
-                t2 = self.jordan_component(4)[0][4]
+                t1 = self.jordan_component(2)._symbol_dict[2][0][4]
+                t2 = self.jordan_component(4)._symbol_dict[2][0][4]
                 t = t2 / t1 % 8
                 if debug > 1:
                     print "t = {0}".format(t)
@@ -271,7 +271,7 @@ class GenusSymbol(object):
         if debug > 0:
             print "N={0}".format(N)
         for p in N.prime_factors():
-            c = self.jordan_component(p)
+            c = self.jordan_component(p)._symbol_dict[p]
             if len(c) == 1:
                 if len(c[0]) == 3:
                     if c[0][1] == 2:
@@ -322,7 +322,7 @@ class GenusSymbol(object):
                 continue
             n = c.valuation(p)
             q = p ** n
-            if c.jordan_component(q)[0][2] * kronecker(2, p) ** c.p_rank(p) == -1:
+            if c.jordan_component(q)._symbol_dict[p][0][2] * kronecker(2, p) ** c.p_rank(p) == -1:
                 if p % 4 == 3:
                     a = -1
                 else:
@@ -338,7 +338,7 @@ class GenusSymbol(object):
             # print r
             if r > 1:
                 # print p, n, c.jordan_component(q)[0][2]
-                if p != 2 and is_even(r) and c.jordan_component(q)[0][2] != 1:
+                if p != 2 and is_even(r) and c.jordan_component(q)._symbol_dict[p][0][2] != 1:
                     vc2 = self._rank_one_values(p, n, 1)
                     r -= 1
                 else:
@@ -623,13 +623,69 @@ class GenusSymbol(object):
                 eps = self._eps(p)
                 a = D / p ** (self.order().valuation(p))
                 if p == 2:
-                    A2 = self.jordan_component(2)
+                    A2 = self.jordan_component(2)._symbol_dict[p]
                     if len(A2) > 0:
                         A2 = GenusSymbol({2: [A2[0]]})
                         if A2.is_odd():
                             continue
                 if not eps == kronecker(a, p):
                     return False
+        return True
+
+    def is_global_unique(self, r, s):
+        r"""
+          Returns True if there is only one lattice in the genus of a
+          global realization of self. We apply Theorem 1.13.2 of [Ni].
+          This is a sufficient but not a necessary condition.
+          Therefore, we return None if the condition is not satisfied.
+        """
+        if not self.is_global(r,s):
+            raise RuntimeError("The finite quadratic module is not global!")
+        r = Integer(r)
+        s = Integer(s)
+
+        nonstr = "The criterion is not satisfied. We cannot decide if the finite quadratic module is unique."
+
+        if not (r >= 1 and s >= 1 and r+s >= 3):
+            print nonstr
+            return None
+        
+        for p in self.level().prime_factors():
+            satisfied = True
+            if not (r+s >= 2 + self.p_rank(p)):
+                satisfied = False
+            if p > 2 and not satisfied:
+                found = False
+                for j in self.jordan_components(p):
+                    if j.p_rank(p) >= 2:
+                        found = True
+                        break
+                if not found:
+                    print nonstr
+                    return None
+            if p == 2 and not satisfied:
+                found = False
+                for j in self.jordan_components(2):
+                    if j.is_odd():
+                        jj = self.jordan_component(2**(j.valuation(2)+1))
+                        if jj.p_rank(p) > 0 and jj.is_odd():
+                            found = True
+                            break
+                    if j.p_rank(2) >= 2:
+                        try:
+                            j - U(2**(j.valuation(2)))
+                            found = True
+                            break
+                        except ValueError:
+                            try:
+                                j - V(2**(j.valuation(2)))
+                                found = True
+                                break
+                            except ValueError:
+                                continue
+                if not found:
+                    print nonstr
+                    return None
         return True
 
     def _eps(self, p):
@@ -690,13 +746,16 @@ class GenusSymbol(object):
             p, n = list(Integer(q).factor())[0]
 
         if not self._symbol_dict.has_key(p):
-            return []
+            return GenusSymbol('1^+1')
         else:
             r = []
             for s in self._symbol_dict[p]:
                 if s[0] == n:
                     r.append(s)
-            return r
+            if len(r) == 0:
+                return GenusSymbol('1^+1')
+            else:
+                return GenusSymbol({p: r})
 
     def rank_of_jordan_component(self, q):
         c = self.jordan_component(q)
@@ -1018,7 +1077,7 @@ class GenusSymbol(object):
                 for c in e[p]:
                     # print c
                     try:
-                        j = s.jordan_component(p ** c[0])
+                        j = s.jordan_component(p ** c[0])._symbol_dict[p]
                         # print j
                     except:
                         raise err
