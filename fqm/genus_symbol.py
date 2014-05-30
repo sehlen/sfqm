@@ -698,6 +698,28 @@ class GenusSymbol(object):
 
     @cached_method
     def dimension_cusp_forms(self, k, no_inv=False, aniso_formula=False, test_positive=False, reduction=False):
+        r"""
+          Computes the dimension of the space of cusp forms of weight $k$
+          for the Weil representation associated with this finite quadratic module.
+
+          INPUT:
+          - k: a half-integer, the weight
+          - no_inv: bool, if True: we do not compute invariants in the case of weight 2 (so assume they are 0)
+          - aniso_formula: bool, if True use the formula involving class numbers to compute the dimension.
+                           works only for anisotropic modules. The formula is given in Theorem XX of [BEF].
+          - test_positive: bool, if True, only test if the dimension is positive
+                           returns a positive number if this is the case,
+                           which is not necessarily equal to the dimension.
+          - reduction: bool, if True, we use reduction mod p to compute the invariants
+                             of the Weil representation, whose dimension is needed for $k = 3/2$ and $k=2$.
+
+          OUTPUT:
+          - an Integer, the dimension of the space of cusp forms of weight $k$
+          for the Weil representation associated with this finite quadratic module
+
+          SEE ALSO:
+          - For more details, see the implementation in PSAGE.
+        """
         s = str(self)
         if not s == '1^+1':
             #M = FiniteQuadraticModule(s)
@@ -710,7 +732,8 @@ class GenusSymbol(object):
         return d
 
     def is_even(self):
-        r'''Returns True if there is no odd 2-adic Jordan component.
+        r'''
+         Returns True if there is no odd 2-adic Jordan component.
         '''
         if self.p_rank(2) == 0:
             return True
