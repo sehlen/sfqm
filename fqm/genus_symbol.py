@@ -9,7 +9,7 @@ from copy import copy, deepcopy
 from sage.parallel.decorate import *
 from sage.misc.cachefunc import *
 import itertools
-from ..tools import BB, h
+from sfqm.tools import BB, h
 
 class GenusSymbol(object):
 
@@ -470,19 +470,21 @@ class GenusSymbol(object):
         K = self._K
         z = self._z
 
-        jd = self.jordan_decomposition()
+        jd = self.jordan_decomposition(flat = True)
 
         ci = ci1 = 1
-        for c in jd:
+        for p, c in jd:
             # c: basis, ( prime p,  valuation of p-power n, dimension r,
             # determinant d over p [, oddity o])
-            p, n, r, d = c[:4]
+            n = c.valuation(p)
+            r = c.p_rank(p)
+            d = c.order()
             # print p,n,r,d
             if _p and p != _p:
                 continue
-            o = None if 4 == len(c) else c[5]
+            o = None if p != 2 else c.oddity()
             # print o
-            odd = False if o == None or c[4] == 0 else True
+            odd = c.is_odd()
             k = valuation(s, p)
             s1 = Integer(s / p ** k)
             h = max(n - k, 0)
@@ -623,11 +625,9 @@ class GenusSymbol(object):
                 eps = self._eps(p)
                 a = D / p ** (self.order().valuation(p))
                 if p == 2:
-                    A2 = self.jordan_component(2)._symbol_dict[p]
-                    if len(A2) > 0:
-                        A2 = GenusSymbol({2: [A2[0]]})
-                        if A2.is_odd():
-                            continue
+                    A2 = self.jordan_component(2)
+                    if A2.is_odd():
+                        continue
                 if not eps == kronecker(a, p):
                     return False
         return True
@@ -755,12 +755,14 @@ class GenusSymbol(object):
         self._reduce()
         return [GenusSymbol({p: [x]}) for x in self._symbol_dict[p]]
 
-    def jordan_decomposition(self):
-        l = []
+    def jordan_decomposition(self, flat = False):
+        l = {}
         for p in self.level().prime_factors():
-            for c in self.jordan_components(p):
-                l.append(p ** c.valuation(p))
-        return flatten(list(map(lambda x: [q.prime_factors()[0]] + x, self.jordan_component(q)) for q in l), max_level=1)
+            l[p] = [c for c in self.jordan_components(p)]
+        if not flat:
+            return l
+        else:
+            return [(p,c) for c in l[p] for p in l.keys() ]
 
     def jordan_component(self, q):
         if not is_prime_power(q):
@@ -1479,3 +1481,36 @@ def anisotropic_symbols(N, sig=None, fake=False):
     have = []
     syms_new = []
     return syms
+
+
+def gamma0_N_genus_symbol(N):
+    s = GenusSymbol()
+    # print s
+    N = Integer(2 * N)
+    for p in N.prime_factors():
+        # print s, p
+        if p == 2:
+            v = N.valuation(2)
+            # print v
+            gs = str(2 ** (v)) + "_" + str((N / 2 ** v) % 8) + "^" + \
+                ("+1" if kronecker(N / 2 ** v, 2) == 1 else "-1")
+            # print gs
+            g = GenusSymbol(gs)
+            s = s + g
+        else:
+            v = N.valuation(p)
+            Np = p ** v
+            np = N / Np
+            gs = str(Np) + "^" + ("+1" if kronecker(np, p) == 1 else "-1")
+            # print gs
+            s = s + GenusSymbol(gs)
+    return s
+
+def gamma1_genus_symbol(N):
+    N = Integer(N)
+    return GenusSymbol(FiniteQuadraticModule([2,N,N],[1/Integer(4),0,0,0,1/N,0]).jordan_decomposition().genus_symbol())
+
+def t1_genus_symbol(a,N):
+    a = Integer(a)
+    N = Integer(N)
+    return GenusSymbol(FiniteQuadraticModule([2*a,N,N],[1/(4*a),0,0,0,1/N,0]).jordan_decomposition().genus_symbol())

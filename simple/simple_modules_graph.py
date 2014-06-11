@@ -845,38 +845,5 @@ def get_symbol_string(sym):
                 symstr = symstr + '^' + sgn + str(s[1])
     return symstr
 
-
-def gamma0_N_genus_symbol(N):
-    s = GenusSymbol()
-    # print s
-    N = Integer(2 * N)
-    for p in N.prime_factors():
-        # print s, p
-        if p == 2:
-            v = N.valuation(2)
-            # print v
-            gs = str(2 ** (v)) + "_" + str((N / 2 ** v) % 8) + "^" + \
-                ("+1" if kronecker(N / 2 ** v, 2) == 1 else "-1")
-            # print gs
-            g = GenusSymbol(gs)
-            s = s + g
-        else:
-            v = N.valuation(p)
-            Np = p ** v
-            np = N / Np
-            gs = str(Np) + "^" + ("+1" if kronecker(np, p) == 1 else "-1")
-            # print gs
-            s = s + GenusSymbol(gs)
-    return s
-
-def gamma1_genus_symbol(N):
-    N = Integer(N)
-    return GenusSymbol(FiniteQuadraticModule([2,N,N],[1/Integer(4),0,0,0,1/N,0]).jordan_decomposition().genus_symbol())
-
-def t1_genus_symbol(a,N):
-    a = Integer(a)
-    N = Integer(N)
-    return GenusSymbol(FiniteQuadraticModule([2*a,N,N],[1/(4*a),0,0,0,1/N,0]).jordan_decomposition().genus_symbol())
-
 def SimpleModulesGraph2n(n, aniso_level_limit):
     return SimpleModulesGraph((2 - n) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n)
