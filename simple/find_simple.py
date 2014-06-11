@@ -1,4 +1,4 @@
-from find_simple_c import _find_simple_anisotropic
+from sfqm.simple.find_simple_c import _find_simple_anisotropic
 from sage.all import Integer, is_squarefree, is_even, is_odd, squarefree_part, walltime, RR, uniq
 from sage.parallel.decorate import *
 
@@ -63,4 +63,69 @@ def find_simple_anisotropic_parallel(num, s, weights=range(2, Integer(27)/2), dy
         else:
             print "%g%% done, ETA: %d seconds, simple lattices: %d" % (RR(done) / RR(s) * 100, timeest * 60, num_simple)
     return simple
+
+def simple_gamma0_genus_symbols(r=range(1,500), precomputed=None):
+    if isinstance(precomputed, list):
+        l = precomputed
+        comp = False
+    res = []
+    for N in r:
+        s = gamma0_N_genus_symbol(N)
+        if not comp:
+            t = contains_isomorphic_module(l,s)
+            if t is not None:
+                res.append(t)
+        else:
+            if s.is_simple(QQ(1.5)):
+                res.append(s)
+    if not comp:
+        return res, filter(lambda x: x not in res, l)
+    else:
+        return res
+
+def simple_gamma1_genus_symbols(r=range(1,500), precomputed=None):
+    if isinstance(precomputed, list):
+        l = precomputed
+        comp = False
+    res = []
+    for N in r:
+        s = gamma1_genus_symbol(N)
+        if not comp:
+            t = contains_isomorphic_module(l, s)
+            if t is not None:
+                res.append(t)
+        else:
+            if s.is_simple(QQ(1.5)):
+                res.append(s)
+    if not comp:
+        return res, filter(lambda x: x not in res, l)
+    else:
+        return res
+
+def simple_t1_genus_symbols(Nr=range(1,100), ar=range(1,100), precomputed=None):
+    if isinstance(precomputed, list):
+        l = precomputed
+        comp = False
+    res = []
+    for s in l:
+        added = False
+        for a in s.level().divisors():
+            for N in s.level().divisors():
+                if s.defines_isomorphic_module(t1_genus_symbol(a,N)):
+                    print s
+                    added = True
+                    res.append(s)
+                    break
+            if added: break
+        if not added:
+            print "{0} not of type t1".format(s)
+                    
+    return res, filter(lambda x: x not in res, l)
+
+def contains_isomorphic_module(l, s):
+    for t in l:
+        if s.defines_isomorphic_module(GenusSymbol(t._symbol_dict)):
+            print t
+            return t
+    return None
     

@@ -32,8 +32,7 @@ from sage.quadratic_forms.genera.genus import GenusSymbol_global_ring, Genus_Sym
 import logging
 import datetime
 
-from ..fqm.genus_symbol import GenusSymbol, anisotropic_symbols, prime_anisotropic_symbols
-from ..jacobiforms.dimension_jac_forms import *
+from sfqm.fqm.genus_symbol import GenusSymbol, anisotropic_symbols, prime_anisotropic_symbols
 
 NCPUS0 = 4
 NCPUS1 = 10
@@ -632,6 +631,7 @@ def test_gaussum(s):
 
 @parallel
 def test_dimension_jacobi(N, k):
+    from nils.jacobiforms.dimension_jac_forms import *
     N = Integer(N)
     dj = dimension_jac_cusp_forms(k + Integer(1) / Integer(2), N)
     M = FiniteQuadraticModule([2 * N], [1 / (4 * N)])

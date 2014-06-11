@@ -115,7 +115,7 @@ class GenusSymbol(object):
         if not self._symbol_dict.has_key(2):
             return 0
         else:
-            return sum([_[4] for _ in self._symbol_dict[2]]) + 4 * len([_ for _ in self._symbol_dict[2] if is_odd(_[0]) and _[2] == -1])
+            return (sum([_[4] for _ in self._symbol_dict[2]]) + 4 * len([_ for _ in self._symbol_dict[2] if is_odd(_[0]) and _[2] == -1])) % 8
 
     @cached_method
     def dimension_estimate_for_anisotropic(self, k, use_simple_est=False):
@@ -478,11 +478,11 @@ class GenusSymbol(object):
             # determinant d over p [, oddity o])
             n = c.valuation(p)
             r = c.p_rank(p)
-            d = c.order()
-            # print p,n,r,d
+            d = c._eps(p**r)
+            #print p,n,r,d
             if _p and p != _p:
                 continue
-            o = None if p != 2 else c.oddity()
+            o = None if p != 2 else (0 if c.is_even() else c._symbol_dict[2][0][4])
             # print o
             odd = c.is_odd()
             k = valuation(s, p)
