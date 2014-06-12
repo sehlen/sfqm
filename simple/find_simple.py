@@ -69,38 +69,38 @@ def simple_gamma0_genus_symbols(r=range(1,500), precomputed=None):
         l = precomputed
         comp = False
     res = []
-    for N in r:
-        s = gamma0_N_genus_symbol(N)
-        if not comp:
-            t = contains_isomorphic_module(l,s)
-            if t is not None:
-                res.append(t)
-        else:
-            if s.is_simple(QQ(1.5)):
+    for s in l:
+        if Integer(4).divides(s.level()):
+            if s.defines_isomorphic_module(gamma0_N_genus_symbol(s.level()/Integer(4))):
                 res.append(s)
-    if not comp:
-        return res, filter(lambda x: x not in res, l)
-    else:
-        return res
+                print s
+    
+    return res, filter(lambda x: x not in res, l)
+    
 
 def simple_gamma1_genus_symbols(r=range(1,500), precomputed=None):
     if isinstance(precomputed, list):
         l = precomputed
         comp = False
     res = []
-    for N in r:
-        s = gamma1_genus_symbol(N)
-        if not comp:
-            t = contains_isomorphic_module(l, s)
-            if t is not None:
-                res.append(t)
-        else:
-            if s.is_simple(QQ(1.5)):
-                res.append(s)
+    
     if not comp:
-        return res, filter(lambda x: x not in res, l)
+        for s in l:
+            if Integer(4).divides(s.level()):
+                if s.defines_isomorphic_module(gamma1_genus_symbol(s.level()//4)):
+                    res.append(s)
+                    print s
+                if (s.level()//2) % 2 == 0:
+                    if s.defines_isomorphic_module(gamma1_genus_symbol(s.level()//2)):
+                        res.append(s)
+                        print s
+                    if s.defines_isomorphic_module(gamma1_genus_symbol(s.level())):
+                        res.append(s)
+                        print s
     else:
-        return res
+        raise NotImplementedError
+    
+    return res, filter(lambda x: x not in res, l)
 
 def simple_t1_genus_symbols(Nr=range(1,100), ar=range(1,100), precomputed=None):
     if isinstance(precomputed, list):
@@ -114,7 +114,7 @@ def simple_t1_genus_symbols(Nr=range(1,100), ar=range(1,100), precomputed=None):
                 if s.defines_isomorphic_module(t1_genus_symbol(a,N)):
                     print s
                     added = True
-                    res.append(s)
+                    res.append(((a,N), s))
                     break
             if added: break
         if not added:

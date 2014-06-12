@@ -762,7 +762,10 @@ class GenusSymbol(object):
         if not flat:
             return l
         else:
-            return [(p,c) for c in l[p] for p in l.keys() ]
+            l1 = []
+            for p in l.keys():
+                l1 += [(p,c) for c in l[p]]
+            return l1
 
     def jordan_component(self, q):
         if not is_prime_power(q):
