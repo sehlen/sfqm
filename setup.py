@@ -2,7 +2,7 @@
 #
 # (c) Copyright 2010 William Stein
 #
-#  This file is part of PSAGE
+#  This file has been copied from PSAGE and modified to our needs.
 #
 #  PSAGE is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -77,6 +77,10 @@ ext_modules = [
       Extension('sfqm.simple.find_simple_c',
               sources = ['sfqm/simple/find_simple_c.pyx'],
               libraries = ['m']
+     ),
+     Extension('psage.modules.invariants',
+              sources = ['psage.modules.invariants.pyx'],
+              libraries = ['m']
      )
 ]
 
@@ -105,4 +109,3 @@ build_system.setup(
     download_url = 'NA',
     ext_modules = ext_modules
 )
-
