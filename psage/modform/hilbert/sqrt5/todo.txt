@@ -1,0 +1,157 @@
+Plan to finish a first complete HMF over Q(sqrt(5)) of weight (2,2)
+implementation that works and is very fast.  Goal is to finish this in
+less than 24 from now!  
+
+   [x] P^1(O_F/N) using fast residue rings
+   [x] is_square
+   [x] sqrt
+   [x] local splitting for O_F/P^n
+   [x] Mat2x2(O_F/N) -- matrix object with optimal action on P^1(O_F/N) elts.
+   [x] 120 icosians
+   [x] Dividing P^1 into orbits for action of R^*.
+   [x] write fast version of code for hecke operator T_P for odd P
+
+   [x] See this for ModN_Reduction.  # TODO: This algorithm only makes sense when trying to compute splitting at one prime, but we're applying it to a product of primes!
+      Example: P = IcosiansModP1ModN(F.primes_above(5) * F.ideal(3))
+
+
+   [ ] code for hecke operator T_2 (hardcode norm 2 elts); easy once have splittings at all primes
+   [ ] make computation of the alpha's for computing Hecke operators fast, so we can compute T_p for p < 10000 (say).
+   [ ] refactor sqrt5_fast.pyx -- it's too big. 
+
+[ ] BUG:
+
+Good example:
+sage: P = sqrt5_fast.IcosiansModP1ModN(F.ideal(8)); P
+The 2 orbits for the action of the Icosian group on Projective line modulo the ideal (8) of norm 64
+sage: o = P.compute_std_to_rep_table_debug(); o
+Found representative number 0: (0, 1)
+It has an orbit of size 60
+Found representative number 1: (1, 1)
+It has an orbit of size 31
+[[0, 2, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 20, 21, 24, 25, 27, 28, 30, 33, 34, 35, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 50, 51, 53, 54, 55, 56, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 70, 73, 74, 75, 76, 78, 79], [1, 3, 12, 13, 14, 22, 23, 26, 29, 31, 32, 38, 43, 49, 52, 60, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]]
+sage: P.cardinality()
+2
+sage: P.
+P.cardinality                     P.compute_std_to_rep_table_debug  
+P.compute_std_to_rep_table        P.hecke_matrix                    
+sage: Proj
+ProjectiveGeometryDesign  ProjectiveHypersurface    ProjectiveSpace           
+sage: P1
+P1List      P1ModList   P1NFList    P1_orbits   P1_orbits2  
+sage: sqrt5_fast.ProjectiveLineModN(F.ideal(8)).cardinality()
+80
+
+-----------------------------------
+
+sage: P = IcosiansModP1ModN(F.ideal(9))
+sage: o = P.compute_std_to_rep_table_debug(); o
+Found representative number 0: (0, 1)
+It has an orbit of size 61
+Found representative number 1: (1 + g, 1)
+It has an orbit of size 35
+
+which violates orbit stabilizer theorem; plus orbits aren't disjoint!
+
+
+sage: P = IcosiansModP1ModN(F.ideal(27))
+sage: P.cardinality()  # it should be 14
+17
+sage: time T = P.hecke_matrix(F.primes_above(5)[0])
+CPU times: user 0.01 s, sys: 0.00 s, total: 0.01 s
+Wall time: 0.01 s
+sage: T.fcp()
+(x - 6) * x^6 * (x^10 - 34*x^8 + 2*x^7 + 366*x^6 - 56*x^5 - 1302*x^4 + 323*x^3 + 239*x^2 + 6*x - 12)
+
+sage: t5 = P.hecke_matrix(F.primes_above(5)[0])
+sage: t57 = P.hecke_matrix(F.primes_above(7)[0])
+sage: t7 = P.hecke_matrix(F.primes_above(7)[0])
+sage: t5*t7 == t7*t5
+False
+
+
+
+
+3 0
+7 1
+9 1
+11 3
+13 3
+17 5
+19 7
+21 9
+23 9
+27 16
+29 15
+31 19
+33 23
+37 23
+39 29
+41 31
+43 31
+47 37
+49 44
+51 49
+53 47
+57 67
+59 59
+61 214
+63 83
+67 75
+69 89
+71 87
+73 89
+77 119
+79 107
+81 159
+83 115
+87 436
+89 135
+91 143
+93 629
+97 157
+99 287
+
+compared to:
+
+> for N in [2..100] do  if GCD(N,10) eq 1 then print N, Dimension(HilbertCuspForms(F, Integers(F)*N)); end if; end for;
+3 0
+
+7 1
+9 1
+11 3
+13 3
+17 5
+19 7
+21 9
+23 9
+27 13
+29 15
+31 19
+33 23
+37 23
+39 29
+41 31
+43 31
+47 37
+49 41
+51 49
+53 47
+57 67
+59 59
+61 67
+63 75
+67 75
+69 89
+71 87
+73 89
+77 119
+79 107
+81 121
+83 115
+87 151
+89 135
+91 143
+93 171
+97 157
+99 215
