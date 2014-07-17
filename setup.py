@@ -79,7 +79,7 @@ ext_modules = [
               libraries = ['m']
      ),
      Extension('psage.modules.invariants',
-              sources = ['psage.modules.invariants.pyx'],
+              sources = ['psage/modules/invariants.pyx'],
               libraries = ['m']
      )
 ]
@@ -99,13 +99,10 @@ build_system.setup(
     packages = ['sfqm',
                 'sfqm.simple',
                 'sfqm.fqm',
-		'psage',
 		'psage.modules',
-		'psage.modules.finite_quadratic_module',
-		'psage.modform',
 		'psage.modform.weilrep_tools'
                 ],
     platforms = ['any'],
-    download_url = 'NA',
+    download_url = 'http://www.github.com/sehlen/sfqm',
     ext_modules = ext_modules
 )
