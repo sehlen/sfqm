@@ -56,6 +56,7 @@ if '-np' in sys.argv:
     INSTALL_PSAGE = False
 else:
     INSTALL_PSAGE = True
+    print 'Also installing psage dependencies...'
 
 def Extension(*args, **kwds):
     if not kwds.has_key('include_dirs'):
