@@ -50,6 +50,13 @@ if '-ba' in sys.argv:
 else:
     FORCE = False
 
+if '-np' in sys.argv:
+    print 'Not including psage in build'
+    sys.argv.remove('-np')
+    INSTALL_PSAGE = False
+else:
+    INSTALL_PSAGE = True
+
 def Extension(*args, **kwds):
     if not kwds.has_key('include_dirs'):
         kwds['include_dirs'] = INCLUDES
@@ -77,16 +84,36 @@ ext_modules = [
       Extension('sfqm.simple.find_simple_c',
               sources = ['sfqm/simple/find_simple_c.pyx'],
               libraries = ['m']
-     ),
-     Extension('psage.modules.invariants',
-              sources = ['psage/modules/invariants.pyx'],
-              libraries = ['m']
      )
 ]
 
-ext_modules.extend(ext_modules)
+if INSTALL_PSAGE:
+   ext_modules.extend(
+   [
+    Extension('psage.modules.invariants',
+              sources = ['psage/modules/invariants.pyx'],
+              libraries = ['m']
+     )
+   ]
+)
+
+#ext_modules.extend(ext_modules)
 
 build_system.cythonize(ext_modules)
+
+packages = [
+             'sfqm',
+             'sfqm.simple',
+             'sfqm.fqm'
+           ]
+
+if INSTALL_PSAGE:
+    packages.extend(
+        [
+          'psage.modules',
+          'psage.modform.weilrep_tools'
+        ]
+    )
 
 build_system.setup(
     name = 'sfqm',
@@ -96,12 +123,7 @@ build_system.setup(
     author_email = 'stephan.j.ehlen@gmail.com',
     url = '',
     license = 'GPL v2+',
-    packages = ['sfqm',
-                'sfqm.simple',
-                'sfqm.fqm',
-		'psage.modules',
-		'psage.modform.weilrep_tools'
-                ],
+    packages = packages,
     platforms = ['any'],
     download_url = 'http://www.github.com/sehlen/sfqm',
     ext_modules = ext_modules
