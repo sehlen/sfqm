@@ -1,4 +1,4 @@
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, CartesianProduct, prod, log, gcd, sign, valuation, binomial
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, CartesianProduct, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from psage.modform.weilrep_tools.dimension import VectorValuedModularForms
 from sage.misc.decorators import options
@@ -69,6 +69,13 @@ class GenusSymbol(object):
             return Integer(1)
         else:
             return Integer(prod([p ** (s[0] * s[1]) for p, l in self._symbol_dict.iteritems() for s in l]))
+
+    @cached_method
+    def _ppowers(self, p=None):
+        if p == None:
+            return sorted([p**a.valuation(p) for p in self.level().prime_divisors() for a in self.jordan_components(p)])
+        else:
+            return sorted([p**a.valuation(p) for a in self.jordan_components(p)])
 
     @cached_method
     def group_structure(self):
@@ -178,6 +185,7 @@ class GenusSymbol(object):
         if not p:
             _P = n.prime_divisors()
             if 2 in _P:
+                # WHY????
                 _P.remove(2)
             _P.sort( reverse = True)
         elif is_prime(p):
@@ -185,8 +193,9 @@ class GenusSymbol(object):
         else:
             raise TypeError
         orbit_dict = dict()
-        while [] != _P:
+        while len(_P) > 0:
             p = _P.pop()
+            print p
             orbit_dict[p] = self._orbit_list(p, short = short)
         return orbit_dict
 
@@ -244,8 +253,8 @@ class GenusSymbol(object):
         """
         if not is_prime(p):
             raise TypeError
-        ppowers = [q for q in self.group_structure() if 0 == q % p]
-        ppowers.sort()
+        ppowers = copy(self._ppowers())
+        print ppowers
         if [] == ppowers:
             return dict()
         orbitdict = {(1,) : 1}
@@ -320,15 +329,19 @@ class GenusSymbol(object):
         while kronecker(tconstant, p) != -1 and tconstant < p:
             tconstant += 1
 
-        ranks = [self.__jd[x][1][2] for x in ppowers]
-        epsilons = [self.__jd[x][1][3] for x in ppowers]
+        ranks = [self.rank_of_jordan_component(x) for x in ppowers]
+        epsilons = [self.sign_of_jordan_component(x) for x in ppowers]
         
         while multiplicitieslist != []:
+
+            print "multiplicitieslist=", multiplicitieslist
 
             multiplicities = multiplicitieslist.pop()
             k = len(multiplicities)-1
             pk = p**k
             m = p*pk
+
+            print "pk={0}, m={1}, k={2}".format(pk, m, k)
 
             if multiplicities[0] == multiplicities[k]:
 
@@ -336,10 +349,14 @@ class GenusSymbol(object):
                 ranksDv1 = ranks[len(ppowers) - len(ordersDv1):]
                 ordersDv1pk = [Integer(x / pk) for x in ordersDv1 if x > pk]
                 ranksDv1pk = ranksDv1[len(ordersDv1)-len(ordersDv1pk):]
+                print "ordersDv1 = {0}, ranksDv1={1}".format(ordersDv1, ranksDv1)
+                print "ordersDv1pk = {0}, ranksDv1pk={1}".format(ordersDv1pk, ranksDv1pk)
 
                 if len(ordersDv1pk) != 0 and ordersDv1pk[0] == p:
 
-                    constantfactor = Integer(prod([min(pk, ordersDv1[j])**ranksDv1[j] for j in range(0, len(ordersDv1))]) / pk)
+                    constantfactor = prod([min(pk, ordersDv1[j])**ranksDv1[j] for j in range(0, len(ordersDv1))]) / pk
+                    print "constantfactor=", constantfactor
+                    constantfactor = Integer(constantfactor)
                     constantfactor *= prod(map(lambda x: p**x, ranksDv1pk[1:]))
                     rank = ranksDv1pk[0]
                     eps = epsilons[len(ranks)-len(ranksDv1pk)]
@@ -550,7 +567,7 @@ class GenusSymbol(object):
                   15/16: 1024}
             True
         """
-        n = self.__A.order()
+        n = self.order()
 
         values = [1]
         
@@ -569,7 +586,7 @@ class GenusSymbol(object):
             return newlist        
 
         def values_even2adic(gs):
-            p, l, n, eps = gs
+            l, n, eps, t, o = gs._symbol_dict[2][0]
             n /= 2
             factor = 2**((l-1)*n)
             if n == 1 and eps == 1:
@@ -579,7 +596,8 @@ class GenusSymbol(object):
                 return [factor * (quotient * (2**((n-1)*(l+1))-eps**(l+1)) + eps**(l+1))] + [factor * quotient * (2**((n-1)*(l+1)) - eps**(valuation(j,2)+1) * 2**((n-1)*(l-valuation(j,2)))) for j in range(1,2**l)] 
             
         def values_odd2adic(gs):
-            p, l, n, eps, t = gs
+            p = 2
+            l, n, eps, tp, t = gs._symbol_dict[2][0]
             # t = t%8
             if eps == +1:
                 if t == 0:
@@ -648,7 +666,7 @@ class GenusSymbol(object):
 
             neven = n - len(tvalues)
             if neven > 0:
-                values = combine_lists(values, values_even2adic((p, l, neven, +1)))
+                values = combine_lists(values, values_even2adic(GenusSymbol('' + str(2**l) + '^+' + str(neven))))
             
             return values
 
@@ -658,11 +676,11 @@ class GenusSymbol(object):
 
             _P.remove(2)
             
-            l = sorted([q for q in self.__jd.keys() if 0 == q%2])
+            l = copy(self._ppowers(2))
             while l != []:
                 q = l.pop()
-                gs = self.__jd[q][1]
-                if len(gs) > 4:
+                gs = self.jordan_component(q)
+                if gs.is_odd():
                     values = combine_lists(values, values_odd2adic(gs))
                 else:
                     values = combine_lists(values, values_even2adic(gs))
@@ -673,7 +691,7 @@ class GenusSymbol(object):
 
             p = _P.pop()
             shortorbitdict = self.orbit_list(p, short = True)
-            level = max(q for q in self.__jd.keys() if 0 == q%p)
+            level = max(self._ppowers(p))
             newvalues = [0 for j in range(0,level)]
             newvalues[0] = 1
             
@@ -723,7 +741,7 @@ class GenusSymbol(object):
             sage: J.two_torsion_values() == {0: 48, 1/4: 16, 1/2: 16, 3/4: 48}
             True
         """
-        n = self.__A.order()
+        n = self.order()
 
         values = [1]
         
@@ -742,7 +760,7 @@ class GenusSymbol(object):
             return newlist        
 
         def two_torsion_values_even2adic(gs):
-            p, l, n, eps = gs
+            l, n, eps, t, o = gs._symbol_dict[2][0]
             n /= 2
             fourn = 4**n
             if l == 1:
@@ -752,7 +770,7 @@ class GenusSymbol(object):
                 return [fourn]
                 
         def two_torsion_values_odd2adic(gs):
-            p, l, n, eps, t = gs
+            l, n, eps, tp, t = gs._symbol_dict[2][0]
             if l == 1:
                 # print "n:", n, "eps:", eps, "t:", t, "n-t:", n-t, (n-t)/2
                 if eps == -1:
@@ -774,11 +792,10 @@ class GenusSymbol(object):
             else:
                 return [2**n]
             
-        l = sorted([q for q in self.__jd.keys() if 0 == q%2])
-        while l != []:
-            q = l.pop()
-            gs = self.__jd[q][1]
-            if len(gs) > 4:
+        for gs in self.jordan_components(2):
+            if gs.order()==1:
+                continue
+            if gs.is_odd():
                 values = combine_lists(values, two_torsion_values_odd2adic(gs))
             else:
                 values = combine_lists(values, two_torsion_values_even2adic(gs))
@@ -1082,7 +1099,7 @@ class GenusSymbol(object):
         return vcnew
 
     @cached_method
-    def values(self):
+    def values_stupid(self):
         ps = self.level().prime_factors()
         levels = []
         for p in ps:
@@ -1144,7 +1161,7 @@ class GenusSymbol(object):
                 vc[val] += mult
         return vc
 
-    def char_invariant(self, s, p=None):
+    def char_invariant(self, s, p=None, debug=0):
         r"""
         If this quadratic module equals $A = (M,Q)$, return
         the characteristic function of $A$ (or $A(p)$ if $p$ is a prime)
@@ -1181,17 +1198,17 @@ class GenusSymbol(object):
             # determinant d over p [, oddity o])
             n = c.valuation(p)
             r = c.p_rank(p)
-            d = c._eps(p**r)
-            #print p,n,r,d
+            d = c._eps(p, n)
+            if debug > 0: print "p={0}, n={1}, r={2}, d={3}".format(p,n,r,d)
             if _p and p != _p:
                 continue
             o = None if p != 2 else (0 if c.is_even() else c._symbol_dict[2][0][4])
-            # print o
+            if debug > 0: print "o=",o
             odd = c.is_odd()
             k = valuation(s, p)
             s1 = Integer(s / p ** k)
             h = max(n - k, 0)
-            # print h
+            if debug > 0: print "h={0}".format(h)
             q = p ** h
             if p != 2:
                 lci = z ** ((r * (1 - q)) % 8) * d ** (h % 2) if h > 0 else 1
@@ -1203,10 +1220,11 @@ class GenusSymbol(object):
                 f = z ** o if odd else 1
                 lci = f * d ** (h % 2) if h > 0 else 1
                 lci1 = q ** (-r) if h > 0 else 1
-                # print f, d, lci
+                if debug > 0: print "f={0}, d={1}, lci={2}".format(f, d, lci)
             if 2 == p:
                 lci = lci ** s1
-            # print "lci=",lci
+            if debug > 0: print "lci=",lci
+            if debug > 0: print "lci1=", lci1
             ci *= lci * kronecker(s1, 1 / lci1)
             ci1 *= lci1
         v = (ci, QQ(ci1).sqrt())
@@ -1214,7 +1232,7 @@ class GenusSymbol(object):
         return v
 
     @cached_method
-    def two_torsion_values(self):
+    def two_torsion_values_stupid(self):
         J = self.jordan_components(2)
         vals = dict()
         for s in J:
@@ -1325,7 +1343,7 @@ class GenusSymbol(object):
             if self.p_rank(p) > r + s:
                 return False
             elif self.p_rank(p) == r + s:
-                eps = self._eps(p)
+                eps = self._eps(p,total=True)
                 a = D / p ** (self.order().valuation(p))
                 if p == 2:
                     A2 = self.jordan_component(2)
@@ -1391,13 +1409,22 @@ class GenusSymbol(object):
                     return None
         return True
 
-    def _eps(self, p):
+    def _eps(self, q, n=None, total=False):
+        if not Integer(q).is_prime_power():
+            raise ValueError("q={0} has to be a prime power".format(q)) 
+        p = q.prime_factors()[0]
+        if n is None and not total:
+            # if n is given, we assume that p is a prime and n is the valuation
+            n = q.valuation(p)
         if not self._symbol_dict.has_key(p):
             return 1
         l = self._symbol_dict[p]
         if len(l) == 0:
             return 1
-        return Integer(prod(s[2] for s in l))
+        if total:
+            return Integer(prod(s[2] for s in l))
+        else:
+            return Integer(prod(s[2] for s in l if s[0] == n))
 
     @cached_method
     def dimension_cusp_forms(self, k, no_inv=False, aniso_formula=False, test_positive=False, reduction=False):
@@ -1492,9 +1519,17 @@ class GenusSymbol(object):
         if not is_prime_power(q):
             raise ValueError("q (={0}) has to be a prime power".format(q))
         c = self.jordan_component(q)
-        if c == []:
+        if c.order() == 1:
             return 0
-        return s.p_rank(q.prime_factors()[0])
+        return c.p_rank(q.prime_factors()[0])
+
+    def sign_of_jordan_component(self,q):
+        if not is_prime_power(q):
+            raise ValueError("q (={0}) has to be a prime power".format(q))
+        c = self.jordan_component(q)
+        if c.order() == 1:
+            return 1
+        return c._symbol_dict[q.prime_factors()[0]][0][2]
 
     def max_rank(self):
         r = 0
@@ -1598,6 +1633,7 @@ class GenusSymbol(object):
         d = dict()
         for s in sl:
             L1 = s.split('^')
+            print L1
             if len(L1) > 2:
                 raise ValueError()
             elif len(L1) == 1:
