@@ -1,1 +1,0 @@
-from finite_quadratic_module import FiniteQuadraticModule
