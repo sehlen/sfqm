@@ -195,13 +195,13 @@ class GenusSymbol(object):
         orbit_dict = dict()
         while len(_P) > 0:
             p = _P.pop()
-            print p
+            #print p
             orbit_dict[p] = self._orbit_list(p, short = short)
         return orbit_dict
 
 
     @cached_method
-    def _orbit_list(self, p, short = False):
+    def _orbit_list(self, p, short = False, debug = 0):
         r"""
         If this is the Jordan decomposition for $(M,Q)$, return the dictionary of
         orbits corresponding to the p-group of $M$.
@@ -253,8 +253,8 @@ class GenusSymbol(object):
         """
         if not is_prime(p):
             raise TypeError
-        ppowers = copy(self._ppowers())
-        print ppowers
+        ppowers = copy(self._ppowers(p))
+        if debug > 0: print ppowers
         if [] == ppowers:
             return dict()
         orbitdict = {(1,) : 1}
@@ -334,14 +334,14 @@ class GenusSymbol(object):
         
         while multiplicitieslist != []:
 
-            print "multiplicitieslist=", multiplicitieslist
+            if debug > 0: print "multiplicitieslist=", multiplicitieslist
 
             multiplicities = multiplicitieslist.pop()
             k = len(multiplicities)-1
             pk = p**k
             m = p*pk
 
-            print "pk={0}, m={1}, k={2}".format(pk, m, k)
+            if debug > 0: print "pk={0}, m={1}, k={2}".format(pk, m, k)
 
             if multiplicities[0] == multiplicities[k]:
 
@@ -349,13 +349,13 @@ class GenusSymbol(object):
                 ranksDv1 = ranks[len(ppowers) - len(ordersDv1):]
                 ordersDv1pk = [Integer(x / pk) for x in ordersDv1 if x > pk]
                 ranksDv1pk = ranksDv1[len(ordersDv1)-len(ordersDv1pk):]
-                print "ordersDv1 = {0}, ranksDv1={1}".format(ordersDv1, ranksDv1)
-                print "ordersDv1pk = {0}, ranksDv1pk={1}".format(ordersDv1pk, ranksDv1pk)
+                if debug > 0: print "ordersDv1 = {0}, ranksDv1={1}".format(ordersDv1, ranksDv1)
+                if debug > 0: print "ordersDv1pk = {0}, ranksDv1pk={1}".format(ordersDv1pk, ranksDv1pk)
 
                 if len(ordersDv1pk) != 0 and ordersDv1pk[0] == p:
 
                     constantfactor = prod([min(pk, ordersDv1[j])**ranksDv1[j] for j in range(0, len(ordersDv1))]) / pk
-                    print "constantfactor=", constantfactor
+                    if debug > 0: print "constantfactor=", constantfactor
                     constantfactor = Integer(constantfactor)
                     constantfactor *= prod(map(lambda x: p**x, ranksDv1pk[1:]))
                     rank = ranksDv1pk[0]
@@ -443,7 +443,7 @@ class GenusSymbol(object):
                     tpjvalues = [0 for j in skips]
                     tpjs = [[x / maxdenominators[0] for x in range(0,maxdenominators[0])]] + [[] for j in skips[1:]]
 
-                    # print "tpjs", tpjs
+                    # if debug > 0: print "tpjs", tpjs
                     
                     while tpjs[0] != []:
 
@@ -517,7 +517,7 @@ class GenusSymbol(object):
                                     
         return orbitdict
 
-    def values( self):
+    def values( self, debug = 0):
         r"""
         If this is the Jordan decomposition for $(M,Q)$, return the values of $Q(x)$ ($x \in M$) as a dictionary d.
 
@@ -645,13 +645,13 @@ class GenusSymbol(object):
             else:
                 squarerepresentationlist[0] = squarerepresentationlist[2**l] = 2**(l/2)
             for k in range(0,l-1,2):
-                # print "k:", k
+                if debug > 0: print "k:", k
                 for a in range(1, 2**(l+1-k),8):
-                    # print "a:", a
+                    if debug > 0: print "a:", a
                     squarerepresentationlist[2**k * a] = 2**(k/2 + 2)
-            # print "Test the squarelist:", sum(squarerepresentationlist) == level, squarerepresentationlist, level
+            if debug > 0: print "Test the squarelist:", sum(squarerepresentationlist) == level, squarerepresentationlist, level
 
-            # print "tvalues", tvalues
+            if debug > 0: print "tvalues", tvalues
             
             t1inverse = inverse_mod(tvalues[0], level)
             values = [squarerepresentationlist[(j * t1inverse)%level]/2 for j in range(0,level)]
@@ -684,12 +684,14 @@ class GenusSymbol(object):
                     values = combine_lists(values, values_odd2adic(gs))
                 else:
                     values = combine_lists(values, values_even2adic(gs))
+                if debug > 0: print values
 
         _P.sort( reverse = True)
 
         while [] != _P:
 
             p = _P.pop()
+            if debug > 0: print "p = ", p
             shortorbitdict = self.orbit_list(p, short = True)
             level = max(self._ppowers(p))
             newvalues = [0 for j in range(0,level)]
@@ -700,7 +702,7 @@ class GenusSymbol(object):
                 if orbit != (1,):
                     
                     k = Integer(valuation(orbit[0],p)-1)
-                    # print orbit
+                    # if debug > 0: print orbit
                     v1 = orbit[1]
                     if v1 == orbit[k+1]:
                     
@@ -712,18 +714,18 @@ class GenusSymbol(object):
 
                         newvalues[Integer(v1 * orbit[k+2] * level) % level] += shortorbitdict[orbit]
 
-                    # print "Position1:", sum(newvalues)
-            # print "1:", values
-            # print "2:", newvalues
+                    # if debug > 0: print "Position1:", sum(newvalues)
+            # if debug > 0: print "1:", values
+            # if debug > 0: print "2:", newvalues
             values = combine_lists(values, newvalues)
-            # print "3:", values
-            # print "Position2:", values, _P, p
+            # if debug > 0: print "3:", values
+            # if debug > 0: print "Position2:", values, _P, p
 
-        # print "Position3:", values
+        # if debug > 0: print "Position3:", values
             
         valuesdict = {Integer(j)/len(values) : values[j] for j in range(0,len(values)) if values[j] != 0}
 
-        # print "Position4:", values, valuesdict, "END"
+        # if debug > 0: print "Position4:", values, valuesdict, "END"
             
         return valuesdict #, values
 
@@ -772,19 +774,19 @@ class GenusSymbol(object):
         def two_torsion_values_odd2adic(gs):
             l, n, eps, tp, t = gs._symbol_dict[2][0]
             if l == 1:
-                # print "n:", n, "eps:", eps, "t:", t, "n-t:", n-t, (n-t)/2
+                # if debug > 0: print "n:", n, "eps:", eps, "t:", t, "n-t:", n-t, (n-t)/2
                 if eps == -1:
                     t = (t + 4) % 8
                 n2 = ((n - t)/2) % 4
                 n1 = n - n2
-                # print "n1:", n1, "n2:", n2, "t:", t
+                # if debug > 0: print "n1:", n1, "n2:", n2, "t:", t
                 list1 = [sum([binomial(n1,k) for k in range(j,n1+1,4)]) for j in range(0,4)]
-                # print list1
+                # if debug > 0: print list1
                 if n2 == 0:
                     return list1
                 else:
                     list2 = [[1,0,0,1],[1,0,1,2],[1,1,3,3]][n2 - 1]
-                    # print list2
+                    # if debug > 0: print list2
                     return combine_lists(list1, list2)
             elif l == 2:
                 twonminusone = 2**(n-1)
@@ -1623,7 +1625,7 @@ class GenusSymbol(object):
 
         return True
 
-    def _from_string(self, s):
+    def _from_string(self, s, debug = 0):
         r'''
            Initializes a GenusSymbol from a string.
            Most parts are copied from finite_quadratic_module.py
@@ -1633,7 +1635,7 @@ class GenusSymbol(object):
         d = dict()
         for s in sl:
             L1 = s.split('^')
-            print L1
+            if debug > 0: print L1
             if len(L1) > 2:
                 raise ValueError()
             elif len(L1) == 1:
