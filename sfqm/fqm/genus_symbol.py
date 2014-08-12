@@ -2085,7 +2085,7 @@ def odd_power_up_rules(genus_symbol, p):
     if not is_odd(p) or not is_prime(p):
         raise ValueError
     Bs = []
-    if genus_symbol.p_rank(2) == 0:
+    if genus_symbol.p_rank(p) == 0:
         return Bs
     J = genus_symbol.jordan_components(p)
     for s in J:
