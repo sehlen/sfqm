@@ -1,3 +1,22 @@
+"""
+Tools to compute with finite quadratic modules and simple lattices.
+
+AUTHOR: (c) Stephan Ehlen, 2014
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 3
+as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+
 from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, CartesianProduct, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from psage.modform.weilrep_tools.dimension import VectorValuedModularForms
@@ -17,6 +36,83 @@ class GenusSymbol(object):
     _z = _K.gen()
 
     def __init__(self, s='1^+1', reduce_symbol=True):
+        r"""
+         Init a genus symbol with a string of the following form:
+         for a prime power $q = p^r$ with $p>2$ and for each integer $n$, there are two possible symbols:
+         a) $q^+n$
+         b) $q^-n$
+         For $p=2$, we accept all symbols of the form $q_t^+n$ and $q_t^-n$,
+         such that $t \equiv n \pmod{2}$ and the symbols $q^+n$ as well as $q^-n$
+         if $n$ is even. For the meaning of these symbols, we refer to [BEF].
+
+         These symbols can be arbitrarily concatenated.
+         They have to be separated by a dot ``.``.
+
+         Note that we do not use any parenthesis for the explnents or subscripts to simplify the notation
+         and to be compatible with the FiniteQuadraticModule class.
+
+         Example:
+           ```2^-2.4_2^+2.3^-1.27^-3.25^+1``` is a valid symbol.
+
+         EXAMPLES::
+
+           sage: s=GenusSymbol('2^-2.4_2^+2.3^-1.27^-3.25^+1')
+           sage: s
+           Genus symbol 2^-2.4_2^+2.3^-1.27^-3.25^+1
+           sage: s.signature()
+           6
+           sage: s.level()
+           5400
+           sage: [s.char_invariant(n) for n in s.level().divisors()]
+           [(-zeta8^2, 1/9720),
+            (zeta8^2, 1/2430),
+            (zeta8^2, 1/1080),
+            (0, 0),
+            (zeta8^2, 1/1944*sqrt(1/5)),
+            (-zeta8^2, 1/270),
+            (1, 1/1215),
+            (-1, 1/120*sqrt(1/3)),
+            (zeta8^2, 1/486*sqrt(1/5)),
+            (0, 0),
+            (zeta8^2, 1/216*sqrt(1/5)),
+            (-1, 1/30*sqrt(1/3)),
+            (0, 0),
+            (1, 1/135),
+            (-zeta8^2, 1/1944),
+            (zeta8^2, 1/40),
+            (zeta8^2, 1/54*sqrt(1/5)),
+            (0, 0),
+            (1, 1/243*sqrt(1/5)),
+            (-1, 1/24*sqrt(1/15)),
+            (zeta8^2, 1/486),
+            (-zeta8^2, 1/10),
+            (0, 0),
+            (zeta8^2, 1/15*sqrt(1/3)),
+            (zeta8^2, 1/216),
+            (1, 1/6*sqrt(1/15)),
+            (0, 0),
+            (0, 0),
+            (-1, 1/27*sqrt(1/5)),
+            (zeta8^2, 1/8*sqrt(1/5)),
+            (-zeta8^2, 1/54),
+            (0, 0),
+            (1, 1/243),
+            (1, 1/5),
+            (-1, 1/24*sqrt(1/3)),
+            (zeta8^2, 1/2*sqrt(1/5)),
+            (0, 0),
+            (-zeta8^2, 1/3*sqrt(1/15)),
+            (-1, 1/6*sqrt(1/3)),
+            (0, 0),
+            (1, 1/27),
+            (zeta8^2, 1/8),
+            (0, 0),
+            (-1, sqrt(1/5)),
+            (-zeta8^2, 1/2),
+            (zeta8^2, 1/3*sqrt(1/3)),
+            (0, 0),
+            (1, 1)]
+        """
         if isinstance(s, dict):
             self._symbol_dict = s
             # print "in init: ", s
@@ -1429,13 +1525,48 @@ class GenusSymbol(object):
             return Integer(prod(s[2] for s in l if s[0] == n))
 
     @cached_method
+    def dimension_modular_forms(self, k, no_inv=False, aniso_formula=False, test_positive=False, reduction=False):
+        r"""
+          Computes the dimension of the space of modular forms of weight $k$
+          for the Weil representation associated with this finite quadratic module.
+
+          INPUT:
+          - k: a half-integer, the weight, >= 2
+          - no_inv: bool, if True: we do not compute invariants in the case of weight 2 (so assume they are 0)
+          - aniso_formula: bool, if True use the formula involving class numbers to compute the dimension.
+                           works only for anisotropic modules. The formula is given in Theorem XX of [BEF].
+          - test_positive: bool, if True, only test if the dimension is positive
+                           returns a positive number if this is the case,
+                           which is not necessarily equal to the dimension.
+          - reduction: bool, if True, we use reduction mod p to compute the invariants
+                             of the Weil representation, whose dimension is needed for $k = 3/2$ and $k=2$.
+
+          OUTPUT:
+          - an Integer, the dimension of the space of cusp forms of weight $k$
+          for the Weil representation associated with this finite quadratic module
+
+          SEE ALSO:
+          - For more details, see the implementation in PSAGE.
+        """
+        s = str(self)
+        if not s == '1^+1':
+            #M = FiniteQuadraticModule(s)
+            V = VectorValuedModularForms(
+                s, True, aniso_formula=aniso_formula, use_reduction=reduction)
+            d = V.dimension(
+                k, no_inv=no_inv, test_positive=test_positive)
+        else:
+            d = dimension_modular_forms(1, k)
+        return d
+
+    @cached_method
     def dimension_cusp_forms(self, k, no_inv=False, aniso_formula=False, test_positive=False, reduction=False):
         r"""
           Computes the dimension of the space of cusp forms of weight $k$
           for the Weil representation associated with this finite quadratic module.
 
           INPUT:
-          - k: a half-integer, the weight
+          - k: a half-integer, the weight, >= 3/2
           - no_inv: bool, if True: we do not compute invariants in the case of weight 2 (so assume they are 0)
           - aniso_formula: bool, if True use the formula involving class numbers to compute the dimension.
                            works only for anisotropic modules. The formula is given in Theorem XX of [BEF].
