@@ -68,3 +68,9 @@ separately from my (sehlen) psage fork (use the devel branch).
 - psage.modules.finite_quadratic_module
 - psage.modform.weilrep_tools
 - psage.modules.weil_invariants
+
+
+EXAMPLES
+========
+
+Todo.
