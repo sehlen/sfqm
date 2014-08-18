@@ -1,10 +1,11 @@
 #################################################################################
 #
-# (c) Copyright 2010 William Stein
+# (c) Copyright 2010 William Stein, 2014 Stephan Ehlen
 #
 #  This file has been copied from PSAGE and modified to our needs.
 #
-#  PSAGE is free software: you can redistribute it and/or modify
+#  PSAGE and all components in this code repository are free software: 
+#  you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
@@ -20,8 +21,7 @@
 #################################################################################
 
 
-import os, sys
-
+import os, sys, tarfile
 
 if sys.maxint != 2**63 - 1:
     print "*"*70
@@ -57,6 +57,8 @@ if '-np' in sys.argv:
 else:
     INSTALL_PSAGE = True
     print 'Also installing psage dependencies...'
+    pt = tarfile.open('psage.tar.bz2', mode='r:bz2')
+    pt.extractall()
 
 def Extension(*args, **kwds):
     if not kwds.has_key('include_dirs'):

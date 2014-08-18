@@ -20,7 +20,7 @@ A) On your own computer which has sage and git installed:
    You should be able to simply run:
    ```
     $ git clone https://github.com/sehlen/sfqm.git
-    $ sage -python setup.py develop
+    $ sage setup.py install
    ```
 
    Then start sage and try the following:
@@ -48,11 +48,12 @@ B) In the sage math cloud (SMC), http://cloud.sagemath.com:
 
    ```
     $ cd sfqm
-    $ sage -python setup.py develop --user
+    $ sage setup.py install --user
    ```
 
    Now you can test the installation as in A),
-   either on the command line or in a worksheet.
+   either on the command line or in a sage worksheet 
+   (you may have to restart the worksheet server in your project).
    
 
 Dependencies
