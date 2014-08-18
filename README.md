@@ -65,9 +65,9 @@ The library dependencies have been included into the release files.
 The following modules are required and can also be obtained
 separately from my (sehlen) psage fork (use the devel branch).
 
-- psage.modules.finite_quadratic_module
-- psage.modform.weilrep_tools
-- psage.modules.weil_invariants
+- psage.modules.finite_quadratic_module (N.-P. Skoruppa et. al.)
+- psage.modform.weilrep_tools (S. Ehlen)
+- psage.modules.weil_invariants (S. Ehlen and N.-P. Skoruppa)
 
 
 EXAMPLES
