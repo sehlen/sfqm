@@ -8,6 +8,10 @@ by Jan H. Bruinier, S. Ehlen and E. Freitag.
 Installation
 ============
 
+(Note: In the install command below, develop should actually be replace by install
+but this does not work at the moment because the cython modules do not get properly installed.
+I will have to fix this soon.)
+
 A) On your own computer which has sage and git installed:
    We expect that a current version of sage is installed on your system (see dependencies).
 
@@ -16,7 +20,7 @@ A) On your own computer which has sage and git installed:
    You should be able to simply run:
    ```
     $ git clone https://github.com/sehlen/sfqm.git
-    $ sage -python setup.py install
+    $ sage -python setup.py develop
    ```
 
    Then start sage and try the following:
@@ -31,7 +35,7 @@ A) On your own computer which has sage and git installed:
 
 B) In the sage math cloud (SMC), http://cloud.sagemath.com:
    This is a nice possibility to try out the programs
-   if you don't have sage installed,
+   if you don't have sage installed.
 
    You only have to modify A) a little bit.
    Instead of the first command you can (in a project of your choice)
@@ -44,10 +48,11 @@ B) In the sage math cloud (SMC), http://cloud.sagemath.com:
 
    ```
     $ cd sfqm
-    $ sage -python setup.py install --user
+    $ sage -python setup.py develop --user
    ```
 
-   Now you can test the installation as in A).
+   Now you can test the installation as in A),
+   either on the command line or in a worksheet.
    
 
 Dependencies
@@ -65,3 +70,4 @@ separately from my (sehlen) psage fork (use the devel branch).
 
 - psage.modules.finite_quadratic_module
 - psage.modform.weilrep_tools
+- psage.modules.weil_invariants
