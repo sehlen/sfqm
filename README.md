@@ -12,7 +12,7 @@ Installation
 but this does not work at the moment because the cython modules do not get properly installed.
 I will have to fix this soon.)
 
-A) On your own computer which has sage and git installed:
+-  A) On your own computer which has sage and git installed:
    We expect that a current version of sage is installed on your system (see dependencies).
 
    Go to the directory where you would like to download the repository to.
@@ -33,7 +33,7 @@ A) On your own computer which has sage and git installed:
    0
    ```
 
-B) In the sage math cloud (SMC), http://cloud.sagemath.com:
+-  B) In the sage math cloud (SMC), http://cloud.sagemath.com:
    This is a nice possibility to try out the programs
    if you don't have sage installed.
 
