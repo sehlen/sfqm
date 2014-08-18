@@ -91,8 +91,8 @@ ext_modules = [
 if INSTALL_PSAGE:
    ext_modules.extend(
    [
-    Extension('psage.modules.invariants',
-              sources = ['psage/modules/invariants.pyx'],
+    Extension('psage.modules.weil_invariants',
+              sources = ['psage/modules/weil_invariants.pyx'],
               libraries = ['m']
      )
    ]
