@@ -8,10 +8,6 @@ by Jan H. Bruinier, S. Ehlen and E. Freitag.
 Installation
 ============
 
-(Note: In the install command below, develop should actually be replace by install
-but this does not work at the moment because the cython modules do not get properly installed.
-I will have to fix this soon.)
-
 -  A) On your own computer which has sage and git installed:
    We expect that a current version of sage is installed on your system (see dependencies).
 
