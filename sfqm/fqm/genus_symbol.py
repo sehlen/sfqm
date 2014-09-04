@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, CartesianProduct, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, CartesianProduct, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm, odd_part
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from psage.modform.weilrep_tools.dimension import VectorValuedModularForms
 from sage.misc.decorators import options
@@ -977,12 +977,11 @@ class GenusSymbol(object):
             print "N={0}".format(N)
         for p in N.prime_factors():
             c = self.jordan_component(p)._symbol_dict[p][0]
-            if len(c) == 1:
-                if len(c[0]) == 3:
-                    if c[0][1] == 2:
-                        q = q * p
-                elif c[0][3] == 0 and c[0][1] == 2:
-                    q = q * 2
+            if len(c) == 3:
+                if c[1] == 2:
+                    q = q * p
+            elif c[3] == 0 and c[1] == 2:
+                q = q * 2
         if debug > 2:
             print A, N, q
         r1 = lambda d: (-1) ** (len(Integer(gcd(d, q)).prime_factors()))
@@ -1001,7 +1000,7 @@ class GenusSymbol(object):
 
         def r3(d):
             R3 = Integer(
-                len([_ for p in Integer(d / gcd(d, q)).prime_factors() if p % 4 == 3]))
+                len([_ for _ in Integer(d / gcd(d, q)).prime_factors() if _ % 4 == 3]))
             if is_odd(R3):
                 return kronecker(-4, R3)
             else:
@@ -1089,7 +1088,7 @@ class GenusSymbol(object):
         if debug > 0:
             print "N={0}".format(N)
         for p in N.prime_factors():
-            c = self.jordan_component(p)._symbol_dict[p]
+            c = self._symbol_dict[p]
             if len(c) == 1:
                 if len(c[0]) == 3:
                     if c[0][1] == 2:
