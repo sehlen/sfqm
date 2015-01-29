@@ -1076,7 +1076,7 @@ class GenusSymbol(object):
         if debug > 0:
             for d in N.divisors():
                 if d * gcd(d, q) % 4 in [0, 3]:
-                    print "d = {0}, r1(d) = {1}, r2(d) = {2}, r3(d) = {3}, eps_odd(d) = {4}, eps2(d) = {5}, H(-d(q,d)) = {6}".format(d, r1(d), r2(d), r3(d), eps_odd(d), eps2(d), h(d, prec))
+                    print "d = {0}, r1(d) = {1}, r2(d) = {2}, r3(d) = {3}, eps_odd(d) = {4}, eps2(d) = {5}, H(-d(q,d)) = {6}".format(d, r1(d), r2(d), r3(d), eps_odd(d), eps2(d), h(d*gcd(d,q), prec))
         return -sum(q / gcd(d, q) * eps(d) * h(d * gcd(d, q), prec) for d in N.divisors() if d * gcd(d, q) % 4 in [0, 3])
 
     def beta_est(self, simple_est=False, debug=0):
