@@ -50,6 +50,11 @@ Installation
    Now you can test the installation as in A),
    either on the command line or in a sage worksheet 
    (you may have to restart the worksheet server in your project).
+   If this does not work, try the following command:
+    
+   ```
+    $ sage setup.py develop --user
+   ```
    
 
 Dependencies
