@@ -2034,6 +2034,40 @@ class GenusSymbol(object):
         else:
             return False
 
+    def __le__(self, o):
+        r"""
+          Compare two genus symbols for ordering.
+        """
+        l = self._symbol_dict
+        m = o._symbol_dict
+        for p in l.keys():
+            if p in m.keys():
+                for i in range(min(len(m[p]), len(l[p]))):
+                    if l[p][i][0] > m[p][i][0]:
+                        return False
+                    if l[p][i][0] == m[p][i][0]:
+                        if l[p][i][1] > l[p][i][1]:
+                            return False
+        return True
+        #return str(self) <= str(o)
+
+    def __lt__(self, o):
+        r"""
+          Compare two genus symbols for ordering.
+        """
+        l = self._symbol_dict
+        m = o._symbol_dict
+        for p in l.keys():
+            if p in m.keys():
+                for i in range(min(len(m[p]), len(l[p]))):
+                    if l[p][i][0] >= m[p][i][0]:
+                        if l[p][i][0] == m[p][i][0]:
+                            if l[p][i][1] >= m[p][i][1]:
+                                return False
+                        else:
+                            return False
+        return True
+
     def __hash__(self):
         r"""
           We use the string representation for hasing.

@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 #from Bsets import dict_to_genus_symbol_string, genus_symbol_string_to_dict, Bbf
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
 from sage.parallel.decorate import *
 from sage.misc.cachefunc import *
 import itertools
@@ -164,8 +164,8 @@ class SimpleModulesGraph(DiGraph):
                 else:
                     p = next_prime(p)
         self._primes = primes
-        self._simple_color = colors.red.rgb() if simple_color is None else simple_color
-        self._nonsimple_color = colors.green.rgb() if nonsimple_color is None else nonsimple_color
+        self._simple_color = colors.darkred.rgb() if simple_color is None else simple_color
+        self._nonsimple_color = colors.darkgreen.rgb() if nonsimple_color is None else nonsimple_color
         self._vertex_colors = dict()
         self._vertex_colors[self._simple_color] = list()
         self._vertex_colors[self._nonsimple_color] = list()
@@ -400,7 +400,7 @@ class SimpleModulesGraph(DiGraph):
         self._simple = uniq(simple)
 
     @options()
-    def plot(self, textvertices=False, only_simple=False, **options):
+    def plot(self, textvertices=False, only_simple=False, fontsize=18, sort=False, fact = 0.5, thickness=4, edges_thickness=4, arrowshorten=8 , linestyle='solid', arrowsize=2, arrows=False, **options):
         r"""
           Plots a SimpleModulesGraph.
         """
@@ -435,6 +435,9 @@ class SimpleModulesGraph(DiGraph):
         print min_w, max_w, widths
         max_vert = max([len(_) for _ in heights.values()])
         for i in range(len(heights)):
+            if sort:
+                heights[i] = sorted(heights[i])
+            #print heights[i]
             real_w = widths[i]
             prev_w = min_w if i == 0 else widths[i - 1]
             next_w = min_w if i == len(heights) - 1 else widths[i + 1]
@@ -442,11 +445,11 @@ class SimpleModulesGraph(DiGraph):
             d = max(2 * float(cur_w - real_w) / len(heights[i]), min_d)
             print real_w, cur_w
             print "d = ", d
-            p = [-(cur_w), float(max_vert) / 2 * i]
+            p = [-(cur_w), float(max_vert) * fact * i]
             w = 0
             for j in range(len(heights[i])):
                 v = heights[i][j]
-                p = [p[0] + w, p[1]]
+                p = [p[0] + w + 0.2, p[1]]
                 w = float(len(str(v))) / float(6)
                 p[0] = p[0] + w + d
                 pos[heights[i][j]] = p
@@ -457,21 +460,24 @@ class SimpleModulesGraph(DiGraph):
                 else:
                     ct = colors.white.rgb()
                 labels.append(
-                    text(str(v), (p[0] + 0.2, p[1]), rgbcolor=ct, zorder=8, fontsize=14))
+                    text("$\mathbf{" + str(v)[1:len(str(v))-1] + "}$", (p[0] + 0.2, p[1]), rgbcolor=ct, zorder=8, fontsize=fontsize))
                 print w
-                P = polygon2d([[p[0] - w, p[1] - 1], [p[0] - w, p[1] + 1], [
-                              p[0] + w, p[1] + 1], [p[0] + w, p[1] - 1]], fill=(not textvertices), rgbcolor=c)
+                P = polygon2d([[p[0] - w, p[1] - 0.9], [p[0] - w, p[1] + 1.1], [
+                              p[0] + w + 0.2, p[1] + 1.1], [p[0] + w + 0.2, p[1] - 0.9]], fill=(not textvertices), rgbcolor=c, thickness=thickness)
                 vertices.append(P)
         for e in self.edges():
-            v = e[1]
+            v = e[0]
             if not self.has_vertex(e[0]) or not self.has_vertex(e[1]):
                 print "deleting edge ", e
                 self.delete_edge(e[0], e[1])
             else:
                 c = simple_color if vertex_colors[
                     simple_color].count(v) > 0 else nonsimple_color
-                edges.append(arrow([pos[e[0]][0], pos[e[0]][
-                             1] + 1], [pos[e[1]][0], pos[e[1]][1] - 1], rgbcolor=c, zorder=-1, arrowshorten=8))
+                if arrows:
+                    edges.append(arrow([pos[e[0]][0], pos[e[0]][
+                             1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9], rgbcolor=c, zorder=-1, arrowsize=arrowsize, arrowshorten=arrowshorten, width=edges_thickness, linestyle=linestyle))
+                else:
+                    edges.append(line2d([[pos[e[0]][0], pos[e[0]][1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9]], rgbcolor=c, zorder=-1, thickness=edges_thickness, linestyle=linestyle))
         print "calculation ended"
         gp = self.graphplot(dpi=300, pos=pos, vertex_size=2050, figsize=round(
             float(max_vert) * 1.5), vertex_colors=vertex_colors)
