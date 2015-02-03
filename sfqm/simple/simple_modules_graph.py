@@ -400,7 +400,8 @@ class SimpleModulesGraph(DiGraph):
         self._simple = uniq(simple)
 
     @options()
-    def plot(self, textvertices=False, only_simple=False, fontsize=18, sort=False, fact = 0.5, thickness=4, edges_thickness=4, arrowshorten=8 , linestyle='solid', arrowsize=2, arrows=False, **options):
+    def plot(self, textvertices=False, only_simple=False, fontsize=18, sort=False, fact = 0.5, thickness=4, edges_thickness=4, arrowshorten=8,
+              linestyle_simple='solid', linestyle_nonsimple='dashed', arrowsize=2, arrows=False, **options):
         r"""
           Plots a SimpleModulesGraph.
         """
@@ -462,8 +463,14 @@ class SimpleModulesGraph(DiGraph):
                 labels.append(
                     text("$\mathbf{" + str(v)[1:len(str(v))-1] + "}$", (p[0] + 0.2, p[1]), rgbcolor=ct, zorder=8, fontsize=fontsize))
                 print w
-                P = polygon2d([[p[0] - w, p[1] - 0.9], [p[0] - w, p[1] + 1.1], [
-                              p[0] + w + 0.2, p[1] + 1.1], [p[0] + w + 0.2, p[1] - 0.9]], fill=(not textvertices), rgbcolor=c, thickness=thickness)
+                if textvertices:
+                    P = line2d([[p[0] - w, p[1] - 0.9], [p[0] - w, p[1] + 1.1]], rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
+                    P += line2d([[p[0] - w, p[1] + 1.1], [p[0] + w + 0.2, p[1] + 1.1]], rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
+                    P += line2d([[p[0] + w + 0.2, p[1] + 1.1], [p[0] + w + 0.2, p[1] - 0.9]], rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
+                    P += line2d([[p[0] + w + 0.2, p[1] - 0.9], [p[0] - w, p[1] - 0.9]], rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
+                else:
+                    polygon2d([[p[0] - w, p[1] - 0.9], [p[0] - w, p[1] + 1.1], [
+                              p[0] + w + 0.2, p[1] + 1.1], [p[0] + w + 0.2, p[1] - 0.9]], fill=(not textvertices), rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
                 vertices.append(P)
         for e in self.edges():
             v = e[0]
@@ -475,9 +482,9 @@ class SimpleModulesGraph(DiGraph):
                     simple_color].count(v) > 0 else nonsimple_color
                 if arrows:
                     edges.append(arrow([pos[e[0]][0], pos[e[0]][
-                             1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9], rgbcolor=c, zorder=-1, arrowsize=arrowsize, arrowshorten=arrowshorten, width=edges_thickness, linestyle=linestyle))
+                             1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9], rgbcolor=c, zorder=-1, arrowsize=arrowsize, arrowshorten=arrowshorten, width=edges_thickness, linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple))
                 else:
-                    edges.append(line2d([[pos[e[0]][0], pos[e[0]][1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9]], rgbcolor=c, zorder=-1, thickness=edges_thickness, linestyle=linestyle))
+                    edges.append(line2d([[pos[e[0]][0], pos[e[0]][1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9]], rgbcolor=c, zorder=-1, thickness=edges_thickness, linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple))
         print "calculation ended"
         gp = self.graphplot(dpi=300, pos=pos, vertex_size=2050, figsize=round(
             float(max_vert) * 1.5), vertex_colors=vertex_colors)
