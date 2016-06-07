@@ -1853,7 +1853,7 @@ class GenusSymbol(object):
                 if n > 1:
                     c = None
                     CP = eval(
-                        "CartesianProduct(" + "[1,3,5,7]," * (n - 1) + ")")
+                        "cartesian_product([" + "[1,3,5,7]," * (n - 1) + "])")
                     # TODO: find better algorithm
                     for x in CP:
                         s = sum(x) % 8
