@@ -1,7 +1,9 @@
 """
 Tools to compute with finite quadratic modules and simple lattices.
 
-AUTHOR: (c) Stephan Ehlen, 2014
+AUTHORS: 
+- Stephan Ehlen (implementation of Genus Symbol, 2014)
+- Sebastian Opitz (code to compute orbits and representation numbers, 2014)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 3
@@ -14,6 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 """
 
@@ -506,7 +509,7 @@ class GenusSymbol(object):
                     if ordersApj != [] and ordersApj[0] == p:
 
                         ranklist.append(ranksApj[0])
-                        epslist.append(epsilons[len(epsilons)-len(ranksD)])
+                        epslist.append(epsilons[len(epsilons)-len(ranksB)-len(ranksApj)])
                         constantfactor *= p**sum(ranksApj[1:])
                         ordersD = [Integer(x / quotient) for x in ordersB if x > quotient]
                         ranksD = ranksB[len(ranksB)-len(ordersD):]
