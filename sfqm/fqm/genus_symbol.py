@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, CartesianProduct, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm, odd_part
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, cartesian_product, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm, odd_part
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from psage.modform.weilrep_tools.dimension import VectorValuedModularForms
 from sage.misc.decorators import options
