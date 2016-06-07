@@ -76,7 +76,7 @@ def Extension(*args, **kwds):
         kwds['extra_compile_args'].append('-w')
 
     E = build_system.Extension(*args, **kwds)
-    E.libraries = ['csage'] + E.libraries
+#    E.libraries = ['csage'] + E.libraries
     return E
 
 
