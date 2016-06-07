@@ -36,12 +36,16 @@ SAGE_ROOT = os.environ['SAGE_ROOT']
 SAGE_LOCAL = os.environ['SAGE_LOCAL']
 
 INCLUDES = ['%s/%s/'%(SAGE_ROOT,x) for x in
-#             ('devel/sage/sage/ext', 'devel/sage', 'devel/sage/sage/gsl',
-            ('src/sage/ext', 'src/sage', 'src/sage/gsl', 'src'
+            ( 'src/sage', 'src/sage/gsl', 'src',
+              'local/lib/python2.7/site-packages/sage/ext/',
+              'local/lib/python2.7/site-packages/cysignals/',
+              'src/sage/ext',
+              'src/build/cythonized/','src/build/cythonized/sage/ext',
               )] \
          + ['%s/%s/'%(SAGE_LOCAL,x) for x in
-             ('include/csage', 'include', 'include/python',
+             ('include', 'include/python',
               'include/python2.7')]
+print "INCLUDES=",INCLUDES
 
 if '-ba' in sys.argv:
     print "Rebuilding all Cython extensions."
@@ -120,7 +124,7 @@ if INSTALL_PSAGE:
 
 build_system.setup(
     name = 'sfqm',
-    version = "2014.x.x",
+    version = "0.2",
     description = "SFQM",
     author = 'Stephan Ehlen',
     author_email = 'stephan.j.ehlen@gmail.com',
