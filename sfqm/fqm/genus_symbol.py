@@ -1858,11 +1858,11 @@ class GenusSymbol(object):
                     for x in CP:
                         s = sum(x) % 8
                         if kronecker(prod(x) * (t - s), 2) == eps:
-                            x.append(t - s)
-                            c = x
+                            c = list(x)
+                            #c.append(t - s)
                             break
                     # print "c=", c
-                    if not c:
+                    if c is None:
                         return False
         return True
 
