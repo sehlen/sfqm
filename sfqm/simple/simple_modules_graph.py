@@ -861,5 +861,5 @@ def get_symbol_string(sym):
                 symstr = symstr + '^' + sgn + str(s[1])
     return symstr
 
-def SimpleModulesGraph2n(n, aniso_level_limit):
-    return SimpleModulesGraph((2 - n) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n)
+def SimpleModulesGraph2n(n, aniso_level_limit, **kwds):
+    return SimpleModulesGraph((2 - n) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, **kwds)
