@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="SFQM : Computing with genus symbols of lattices and finite quadratic modules">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SFQM</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/sehlen/sfqm">View on GitHub</a>
+
+          <h1 id="project_title">SFQM</h1>
+          <h2 id="project_tagline">Computing with genus symbols of lattices and finite quadratic modules</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/sehlen/sfqm/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/sehlen/sfqm/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="finite-quadratic-modules-and-simple-lattices" class="anchor" href="#finite-quadratic-modules-and-simple-lattices" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Finite Quadratic Modules and Simple Lattices</h1>
+
+<p>Implementation of several algorithms, tools and supplementary material
+for the article "Lattices with many Borcherds products" 
+by Jan H. Bruinier, S. Ehlen and E. Freitag.</p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+
+<ul>
+<li>
+<p>A) On your own computer which has sage and git installed:
+We expect that a current version of sage is installed on your system (see dependencies).</p>
+
+<p>Go to the directory where you would like to download the repository to.</p>
+
+<p>You should be able to simply run:</p>
+
+<pre><code>$ git clone https://github.com/sehlen/sfqm.git
+$ sage setup.py install
+</code></pre>
+
+<p>Then start sage and try the following:</p>
+
+<pre><code>sage: from sfqm.fqm.genus_symbol import *
+sage: s = GenusSymbol('3^+1')
+sage: s
+Genus symbol 3^+1
+sage: s.dimension_cusp_forms(3)
+0
+</code></pre>
+</li>
+<li>
+<p>B) In the sage math cloud (SMC), <a href="http://cloud.sagemath.com">http://cloud.sagemath.com</a>:
+This is a nice possibility to try out the programs
+if you don't have sage installed.</p>
+
+<p>You only have to modify A) a little bit.
+Instead of the first command you can (in a project of your choice)
+click on the "+ New" button whcih you use to create a new file.</p>
+
+<p>Then you insert the url <code>https://github.com/sehlen/sfqm.git</code>
+in the input field (filename) and click on "From Internet".</p>
+
+<p>Now open a new terminal ("+New" and then "Terminal") and type:</p>
+
+<pre><code>$ cd sfqm
+$ sage setup.py install --user
+</code></pre>
+
+<p>Now you can test the installation as in A),
+either on the command line or in a sage worksheet 
+(you may have to restart the worksheet server in your project).
+If this does not work, try the following command:</p>
+
+<pre><code>$ sage setup.py develop --user
+</code></pre>
+</li>
+</ul>
+
+<h1>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h1>
+
+<ul>
+<li><p>sage: A current version of sage 
+(we tested the implementation with sage 6.1.1 and sage 6.2)</p></li>
+<li><p>git: if you do not have git installed, you can download the tarball version.</p></li>
+</ul>
+
+<p>The library dependencies have been included into the release files.</p>
+
+<p>The following modules are required and can also be obtained
+separately from my (sehlen) psage fork (use the devel branch).</p>
+
+<ul>
+<li>psage.modules.finite_quadratic_module (N.-P. Skoruppa et. al.)</li>
+<li>psage.modform.weilrep_tools (S. Ehlen)</li>
+<li>psage.modules.weil_invariants (S. Ehlen and N.-P. Skoruppa)</li>
+</ul>
+
+<h1>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>EXAMPLES</h1>
+
+<p>Todo.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">SFQM maintained by <a href="https://github.com/sehlen">sehlen</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
