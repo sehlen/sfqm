@@ -2378,8 +2378,11 @@ def anisotropic_symbols(N, sig=None, fake=False):
         raise ValueError(
             "You provided a signature and requested fake symbols. This does not make any sense.")
     syms = []
-    if N == 1 and (sig == None or sig % 8 == 0):
-        return prime_anisotropic_symbols(1)
+    if N == 1:
+        if (sig == None or sig % 8 == 0):
+            return prime_anisotropic_symbols(1)
+        else:
+            return []
     if is_prime_power(N):
         syms = prime_anisotropic_symbols(N, fake=fake)
     else:
