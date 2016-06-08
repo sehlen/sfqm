@@ -220,7 +220,7 @@ class SimpleModulesGraph(DiGraph):
     @parallel(ncpus=NCPUS0)
     def _compute_simple_modules_graph_from_startpoint_parallel(self, s, p=None, cut_nonsimple_aniso=True, fast=1):
         G = SimpleModulesGraph(
-            self._signature, self._weight, self._level_limit, self._rank_limit, self._primes)
+            self._signature, self._weight, self._level_limit, self._rank_limit, self._primes, reduction=self._reduction)
         G._compute_simple_modules_graph_from_startpoint(
             s, p, cut_nonsimple_aniso, fast)
         return G
