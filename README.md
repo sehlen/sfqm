@@ -61,7 +61,7 @@ Dependencies
 ============
 
 - sage: A current version of sage 
-(we tested the implementation with sage 6.1.1 and sage 6.2)
+(the implementation has been updated to work with sage 7.2)
 
 - git: if you do not have git installed, you can download the tarball version.
 
