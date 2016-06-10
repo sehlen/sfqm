@@ -177,27 +177,33 @@ class SimpleModulesGraph(DiGraph):
 
     def compute_from_startpoints(self, points, p = None, cut_nonsimple_aniso = True, fast = 1, **kwds):
         self._reduction = kwds.get('reduction', self._reduction)
-        for r in self._compute_simple_modules_graph_from_startpoint_parallel([(a, p, cut_nonsimple_aniso, fast) for a in points]):
-            if not isinstance(r[1], SimpleModulesGraph):
-                logger.error("Got something else... {0}".format(r))
-            # print r
-            G = r[1]
-            logger.debug("simple from G: {0}".format(len(G._simple)))
-            logger.debug(G._simple)
-            self.add_vertices(G.vertices())
-            self.add_edges(G.edges())
-            self._vertex_colors[
-                self._nonsimple_color] += G._vertex_colors[G._nonsimple_color]
-            self._vertex_colors[
-                self._simple_color] += G._vertex_colors[G._simple_color]
-            self._simple = uniq(self._simple + G._simple)
-            for h in G._heights.keys():
-                if not self._heights.has_key(h):
-                    self._heights[h] = G._heights[h]
+        if NCPUS0 == 1:
+            for a in points:
+                self._compute_simple_modules_graph_from_startpoint(a, p, cut_nonsimple_aniso, fast)
+        else:
+            computations = self._compute_simple_modules_graph_from_startpoint_parallel([(a, p, cut_nonsimple_aniso, fast) for a in points])
+            for r in computations:
+                if not isinstance(r[1], SimpleModulesGraph):
+                    logger.error("Got something else... {0}".format(r))
+                    # print r
                 else:
-                    self._heights[h] = uniq(self._heights[h] + G._heights[h])
-            logger.info("Found {0} {1}-simple module{2} so far.".format(
-                len(self._simple), self._weight, "s" if len(self._simple) != 1 else ""))
+                    G = r[1]
+                    logger.debug("simple from G: {0}".format(len(G._simple)))
+                    logger.debug(G._simple)
+                    self.add_vertices(G.vertices())
+                    self.add_edges(G.edges())
+                    self._vertex_colors[
+                        self._nonsimple_color] += G._vertex_colors[G._nonsimple_color]
+                    self._vertex_colors[
+                        self._simple_color] += G._vertex_colors[G._simple_color]
+                    self._simple = uniq(self._simple + G._simple)
+                    for h in G._heights.keys():
+                        if not self._heights.has_key(h):
+                            self._heights[h] = G._heights[h]
+                        else:
+                            self._heights[h] = uniq(self._heights[h] + G._heights[h])
+                            logger.info("Found {0} {1}-simple module{2} so far.".format(
+                                len(self._simple), self._weight, "s" if len(self._simple) != 1 else ""))
         logger.info("Found in total {0} {1}-simple module{3} with p-rank <= {2}".format(
             len(self._simple), self._weight, self._rank_limit, "s" if len(self._simple) != 1 else ""))
         return 0
@@ -386,7 +392,12 @@ class SimpleModulesGraph(DiGraph):
             # this is done in parallel
             # when a process returns
             # we add the vertex and give it its appropriate color
-            for check in check_simple(checklist):
+            if NCPUS1 == 1:
+                checks = [([[s[0]]],check_simple(*s)) for s in checklist]
+            else:
+                checks = list(check_simple(checklist))
+            logger.info("checks = {0}".format(checks))
+            for check in checks:
                 s2 = check[0][0][0]
                 if check[1]:
                     simple = True

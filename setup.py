@@ -23,14 +23,18 @@
 
 import os, sys, tarfile
 
+#from distutils.core import setup
+from setuptools import setup
+
+from Cython.Build import cythonize
+import distutils.extension# import Extension
+from Cython.Distutils import build_ext
+
 if sys.maxint != 2**63 - 1:
     print "*"*70
     print "The PSAGE library only works on 64-bit computers.  Terminating build."
     print "*"*70
     sys.exit(1)
-
-
-import build_system
 
 SAGE_ROOT = os.environ['SAGE_ROOT']
 SAGE_LOCAL = os.environ['SAGE_LOCAL']
@@ -69,23 +73,19 @@ def Extension(*args, **kwds):
         kwds['include_dirs'] = INCLUDES
     else:
         kwds['include_dirs'] += INCLUDES
-    if not kwds.has_key('force'):
-        kwds['force'] = FORCE
+#    if not kwds.has_key('force'):
+#        kwds['force'] = FORCE
 
     # Disable warnings when running GCC step -- cython has already parsed the code and
     # generated any warnings; the GCC ones are noise.
-    if not kwds.has_key('extra_compile_args'):
-        kwds['extra_compile_args'] = ['-w']
-    else:
-        kwds['extra_compile_args'].append('-w')
+#    if not kwds.has_key('extra_compile_args'):
+#        kwds['extra_compile_args'] = ['-w']
+#    else:
+#        kwds['extra_compile_args'].append('-w')
 
-    E = build_system.Extension(*args, **kwds)
+    E = distutils.extension.Extension(*args, **kwds)
 #    E.libraries = ['csage'] + E.libraries
     return E
-
-
-numpy_include_dirs = [os.path.join(SAGE_LOCAL,
-                                   'lib/python/site-packages/numpy/core/include')]
 
 ext_modules = [
       Extension('sfqm.simple.find_simple_c',
@@ -99,14 +99,16 @@ if INSTALL_PSAGE:
    [
     Extension('psage.modules.weil_invariants',
               sources = ['psage/modules/weil_invariants.pyx'],
-              libraries = ['m']
+              libraries = ['m'],
+              extra_compile_args = ["-O3", "-ffast-math", "-march=native", "-fopenmp" ],
+              extra_link_args=['-fopenmp']
      )
    ]
 )
 
 #ext_modules.extend(ext_modules)
 
-build_system.cythonize(ext_modules)
+#cythonize(ext_modules)
 
 packages = [
              'sfqm',
@@ -122,7 +124,7 @@ if INSTALL_PSAGE:
         ]
     )
 
-build_system.setup(
+setup(
     name = 'sfqm',
     version = "0.2",
     description = "SFQM",
@@ -133,5 +135,6 @@ build_system.setup(
     packages = packages,
     platforms = ['any'],
     download_url = 'http://www.github.com/sehlen/sfqm',
-    ext_modules = ext_modules
+    cmdclass = {'build_ext': build_ext},
+    ext_modules = ext_modules,
 )
