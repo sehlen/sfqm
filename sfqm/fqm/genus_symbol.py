@@ -4,6 +4,10 @@ Tools to compute with finite quadratic modules and simple lattices.
 AUTHORS: 
 - Stephan Ehlen (implementation of Genus Symbol, 2014)
 - Sebastian Opitz (code to compute orbits and representation numbers, 2014)
+- a few code snippets have been copied from the FiniteQuadraticModule code,
+written by Nils Skoruppa et. al., see the psage repository (https://github.com/sehlen/psage)
+or http://data.countnumber.de
+
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 3
@@ -1270,6 +1274,7 @@ class GenusSymbol(object):
 
         NOTE
             We apply the formula in [Sko, Second Proof of Theorem 1.4.1].
+            Code taken from FQM package
 
         EXAMPLES NONE
         """
