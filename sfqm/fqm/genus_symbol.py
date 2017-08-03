@@ -1435,14 +1435,16 @@ class GenusSymbol(object):
         else:
             return False
 
-    def is_global(self, r, s):
+    def is_global(self, r, s, even=True):
         r""" Checks if this symbol can be realized as
-             the genus symbol of an even integral lattice
+             the genus symbol of an (even if flag is set) integral lattice
              of type (r,s).
         """
+        if not even:
+            raise NotImplementedError("Odd lattices are not supported so far")
         D = self.order() * (-1) ** s
         # print D
-        if (r - s) % 8 != self.signature():
+        if even and (r - s) % 8 != self.signature():
             return False
         for p in self.level().prime_factors():
             if self.p_rank(p) > r + s:
@@ -1684,7 +1686,7 @@ class GenusSymbol(object):
         return map(lambda x: GenusSymbol(x), Bbf(self.finite_quadratic_module(), m))
 
     #@cached_method
-    def C(self, m, unique=True):
+    def C(self, m, unique=False):
         r'''
           Computes the C-Set of this genus symbol.
 
@@ -2046,15 +2048,21 @@ class GenusSymbol(object):
         r"""
           Compare two genus symbols for ordering.
         """
+        if self.level() > o.level():
+            return False
+        if self.order() > o.order():
+            return False
         l = self._symbol_dict
         m = o._symbol_dict
-        for p in l.keys():
+        for p in sorted(l.keys()):
             if p in m.keys():
                 for i in range(min(len(m[p]), len(l[p]))):
                     if l[p][i][0] > m[p][i][0]:
                         return False
                     if l[p][i][0] == m[p][i][0]:
                         if l[p][i][1] > l[p][i][1]:
+                            return False
+                        elif l[p][i][2] < m[p][i][2]:
                             return False
         return True
         #return str(self) <= str(o)
@@ -2063,6 +2071,10 @@ class GenusSymbol(object):
         r"""
           Compare two genus symbols for ordering.
         """
+        if self.level() > o.level():
+            return False
+        if self.order() > o.order():
+            return False
         l = self._symbol_dict
         m = o._symbol_dict
         for p in l.keys():
@@ -2070,10 +2082,14 @@ class GenusSymbol(object):
                 for i in range(min(len(m[p]), len(l[p]))):
                     if l[p][i][0] >= m[p][i][0]:
                         if l[p][i][0] == m[p][i][0]:
-                            if l[p][i][1] >= m[p][i][1]:
+                            if l[p][i][1] > m[p][i][1]:
+                                return False
+                            elif l[p][i][1] == m[p][i][1] and l[p][i][2] < m[p][i][2]:
                                 return False
                         else:
                             return False
+                    else:
+                        return True
         return True
 
     def __hash__(self):
@@ -2106,7 +2122,7 @@ class GenusSymbol(object):
 
 
 @cached_function
-def C(genus_symbol, m):
+def C(genus_symbol, m, use_isomorphisms=True):
     r"""
       Return the set C(genus_symbol, m) as defined in [BEF].
     """
@@ -2132,12 +2148,21 @@ def C(genus_symbol, m):
     if p == 2:
         Cs = Cs + two_power_up_rules(genus_symbol)
         Cs = Cs + two_level_4_rules(genus_symbol)
+        if use_isomorphisms and genus_symbol.p_rank(2)==3 and genus_symbol.values()[0]>1 and genus_symbol.signature() % 2 == 1:
+            j2 = genus_symbol.jordan_component(2)+genus_symbol.jordan_component(4)
+            s = j2.signature()
+            if s % 2 == 1:
+                l = [GenusSymbol("2_0^2.4_{0}^{1}".format(s, 1 if s % 8 in [1,7] else -1)), GenusSymbol("2_2^2.4_{0}^{1}".format((s-2) % 8, 1 if (s-2) % 8 in [1,7] else -1)), GenusSymbol("2_6^2.4_{0}^{1}".format((s-6) % 8, 1 if (s-6) % 8 in [1,7] else -1))]
+                if j2 in l:
+                    l.remove(j2)
+                    for t in l:
+                        Cs = Cs + C((genus_symbol - j2) + t,2,use_isomorphisms=False)
     else:
         Cs = Cs + odd_power_up_rules(genus_symbol, p)
     if not rec:
         return Cs
     else:
-        return sum(C(s,n) for s in Bs)
+        return sum(C(s,n) for s in Cs)
 
 
 def two_level_4_rules(genus_symbol):
