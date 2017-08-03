@@ -139,12 +139,12 @@ class GenusSymbol(object):
     def canonical_symbol(self):
         raise NotImplementedError
 
-    def defines_isomorphic_module(self, other):
+    def defines_isomorphic_module(self, other, ignore_unimodular_2_component=True):
         if isinstance(other, str):
             other = GenusSymbol(other)
         elif not isinstance(other, GenusSymbol):
             raise TypeError
-        if self == other:
+        if ignore_unimodular_2_component and self == other:
             return True
         if self.group_structure() != other.group_structure():
             return False
@@ -152,6 +152,22 @@ class GenusSymbol(object):
         for t in divs:
             if self.char_invariant(t) != other.char_invariant(t):
                 return False
+        if not ignore_unimodular_2_component:
+            if self.is_even() and other.is_odd():
+                return False
+            elif self.p_rank(2) != other.p_rank(2):
+                return False
+            else:
+                if self.p_rank(2)>0:
+                    if self._symbol_dict[2][0][0] == 0:
+                        if not other._symbol_dict[2][0][0] != 0:
+                            return False
+                    if other._symbol_dict[2][0][0] == 0:
+                        if not self._symbol_dict[2][0][0] != 0:
+                            return False
+                    if self._symbol_dict[2][0][0] == 0:
+                        if not self._symbol_dict[2][0] == other._symbol_dict[2][0]:
+                            return False
         return True
 
     def finite_quadratic_module(self):
@@ -1435,27 +1451,25 @@ class GenusSymbol(object):
         else:
             return False
 
-    def is_global(self, r, s, even=True):
+    def is_global(self, r, s):
         r""" Checks if this symbol can be realized as
-             the genus symbol of an (even if flag is set) integral lattice
+             the genus symbol of an integral lattice
              of type (r,s).
         """
-        if not even:
-            raise NotImplementedError("Odd lattices are not supported so far")
         D = self.order() * (-1) ** s
         # print D
-        if even and (r - s) % 8 != self.signature():
+        if (r - s) % 8 != self.signature():
             return False
         for p in self.level().prime_factors():
             if self.p_rank(p) > r + s:
                 return False
             elif self.p_rank(p) == r + s:
-                eps = self._eps(p,total=True)
-                a = D / p ** (self.order().valuation(p))
                 if p == 2:
                     A2 = self.jordan_component(2)
                     if A2.is_odd():
                         continue
+                eps = self._eps(p,total=True)
+                a = D / p ** (self.order().valuation(p))
                 if not eps == kronecker(a, p):
                     return False
         return True
@@ -1840,6 +1854,8 @@ class GenusSymbol(object):
         if not self._symbol_dict.has_key(2):
             return True
         for r, n, eps, tp, t in self._symbol_dict[2]:
+            if r == 0:
+                continue
             # print r,n,eps,tp,t
             if tp == None:
                 tp = 0
@@ -1894,6 +1910,10 @@ class GenusSymbol(object):
                 else:
                     sgn = '+' if (s[2] == 1) else '-'
                     symstr = symstr + '^' + sgn + str(s[1])
+        if self.is_odd():
+            symstr = "I(" + symstr + ")"
+        else:
+            symstr = "II(" + symstr + ")"
         return symstr
 
     def _reduce(self):
@@ -1902,8 +1922,9 @@ class GenusSymbol(object):
             for s in sl:
                 if s[1] == 0:
                     sl.remove(s)
-                if s[0] == 0:
-                    sl.remove(s)
+                if p != 2:
+                    if s[0] == 0:
+                        sl.remove(s)
             if p != 2:
                 sl.sort()
                 for s in sl:
@@ -2057,6 +2078,8 @@ class GenusSymbol(object):
         for p in sorted(l.keys()):
             if p in m.keys():
                 for i in range(min(len(m[p]), len(l[p]))):
+                    if l[p][i][0] == m[p][i][0] == 0:
+                        continue
                     if l[p][i][0] > m[p][i][0]:
                         return False
                     if l[p][i][0] == m[p][i][0]:
@@ -2080,6 +2103,8 @@ class GenusSymbol(object):
         for p in l.keys():
             if p in m.keys():
                 for i in range(min(len(m[p]), len(l[p]))):
+                    if l[p][i][0] == m[p][i][0] == 0:
+                        continue
                     if l[p][i][0] >= m[p][i][0]:
                         if l[p][i][0] == m[p][i][0]:
                             if l[p][i][1] > m[p][i][1]:
