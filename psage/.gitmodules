@@ -1,3 +1,0 @@
-[submodule "psage/external/weil_invariants"]
-	path = psage/external/weil_invariants
-	url = git@github.com:sehlen/weil_invariants.git
