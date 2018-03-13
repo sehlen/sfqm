@@ -161,7 +161,7 @@ class SimpleModulesGraph(DiGraph):
         if primes is None:
             p = 2
             while True:
-                if prime_pol_simple(p, weight) > 0:
+                if prime_pol_simple(p, weight) > self._bound:
                     primes = list(prime_range(p))
                     break
                 else:
