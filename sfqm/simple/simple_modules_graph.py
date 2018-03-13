@@ -38,9 +38,8 @@ NCPUS0 = 4
 NCPUS1 = 10
 
 @parallel(ncpus=NCPUS1)
-def check_simple(s, k, reduction = False):
-    return s.is_simple(k, reduction=reduction)
-
+def check_simple(s, k, reduction = False, bound = 0):
+    return s.is_simple(k, reduction=reduction, bound=bound)
 
 def prime_pol(s, p, k):
     A = RR(s.order())
@@ -127,7 +126,7 @@ class SimpleModulesGraph(DiGraph):
     """
 
     def __init__(self, signature=0, weight=2, level_limit=34, rank_limit=4, primes=None, simple_color=None, nonsimple_color=None,
-                 reduction=True):
+                 reduction=True, bound=0):
         """
             Initialize a SimpleModulesGraph containing finite quadratic modules of signature ``signature``.
             They are checked for being ``weight``-simple if their minimal number of generators
@@ -138,6 +137,7 @@ class SimpleModulesGraph(DiGraph):
             - ``weight``: check for cusp forms of weight ``weight``
             - ``level_limit``: only check for anisotropic modules with level smaller than ``level_limit``
             - ``rank_limit``: an upper bound for the minimal number of generators
+            - ``bound``: upper bound for the dimension (for considered being simple), default=0
 
             OUTPUT:
             A SimpleModulesGraph object. No computations are done after initialization.
@@ -151,6 +151,7 @@ class SimpleModulesGraph(DiGraph):
         self._signature = Integer(signature) % 8
         self._weight = QQ(weight)
         self._reduction = reduction
+        self._bound = bound
         #########################################################
         # Initialize the primes that need to be checked
         # According to Proposition XX in [BEF],
@@ -265,7 +266,7 @@ class SimpleModulesGraph(DiGraph):
         else:
             primes = [p]
 
-        simple = s.is_simple(k, reduction = self._reduction)
+        simple = s.is_simple(k, reduction = self._reduction, bound = self._bound)
         
         if not simple:
             logger.info("{0} is not simple.".format(s))
@@ -288,7 +289,7 @@ class SimpleModulesGraph(DiGraph):
                 p = primes[i]
                 fs = False
                 for t in s.genus_symbol().C(p, False):
-                    if t.is_simple(k):
+                    if t.is_simple(k, bound = self._bound):
                         fs = True
                         logger.debug("Setting fs = True")
                         break
@@ -385,7 +386,7 @@ class SimpleModulesGraph(DiGraph):
                         if not vertex_colors[nonsimple_color].count(s2) > 0:
                             vertex_colors[nonsimple_color].append(s2)
                     else:
-                        checklist.append((s2, k, self._reduction))
+                        checklist.append((s2, k, self._reduction, self._bound))
             logger.debug("checklist = {0}".format(checklist))
             # check the modules in checklist
             # for being k-simple

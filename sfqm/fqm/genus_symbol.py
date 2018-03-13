@@ -1425,12 +1425,12 @@ class GenusSymbol(object):
         return Integer(sig % 8)
 
     @cached_method
-    def is_simple(self, k, no_inv=False, aniso_formula=False, reduction=True):
+    def is_simple(self, k, no_inv=False, aniso_formula=False, reduction=True, bound=0):
         d = self.dimension_cusp_forms(
-            k, no_inv, aniso_formula, test_positive=True, reduction=reduction)
+            k, no_inv, aniso_formula, test_positive=True if bound == 0 else False, reduction=reduction)
         if d < 0:
             raise ValueError("Negative dimension for {0}".format(self))
-        if d == 0:
+        if d <= bound:
             return True
         else:
             return False
