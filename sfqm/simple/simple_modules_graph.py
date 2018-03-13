@@ -621,8 +621,8 @@ class FQM_vertex(object):
         return FiniteQuadraticModule(self._genus_symbol)
 
     @cached_method
-    def is_simple(self, k, reduction=True):
-        return self._genus_symbol.is_simple(k, reduction=reduction)
+    def is_simple(self, k, reduction=True, bound=0):
+        return self._genus_symbol.is_simple(k, reduction=reduction, bound=bound)
 
     def __eq__(self, o):
         if o.genus_symbol() == self.genus_symbol():
