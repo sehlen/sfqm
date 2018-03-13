@@ -1683,7 +1683,8 @@ class GenusSymbol(object):
         r'''
         Computes the B-Set of this symbol by brute force.
         '''
-        return map(lambda x: GenusSymbol(x), Bbf(self.finite_quadratic_module(), m))
+        from sfqm.Bsets import Bbf
+        return Bbf(self.finite_quadratic_module(), m)
 
     #@cached_method
     def C(self, m, unique=False):

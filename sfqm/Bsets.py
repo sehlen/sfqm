@@ -1,8 +1,9 @@
 from sage.quadratic_forms.genera.genus import GenusSymbol_global_ring, Genus_Symbol_p_adic_ring, is_GlobalGenus
-#from psage.modules.finite_quadratic_module import FiniteQuadraticModule
+from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from sage.matrix.matrix_space import MatrixSpace
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, sqrt
 import itertools
+from sfqm.fqm.genus_symbol import GenusSymbol
 
 @parallel
 def is_quotient(M,sym,rank):
@@ -26,7 +27,7 @@ def is_quotient(M,sym,rank):
             Q = G.quotient()
             if Q.is_isomorphic(M):
                 print Q
-                return N
+                return N.jordan_decomposition().genus_symbol()
             else:
                 del(Q)
     del(N)
@@ -645,18 +646,18 @@ def Bbf(M,m): #brute force algorithm
     symbols = all_symbols(sign,rank,M.order()*m**2)
     B = list(is_quotient([(M,sym,rank) for sym in symbols]))
     B = filter(lambda x: x[1] != False, B)
-    B = map(lambda x: x[1], B)
+    B = map(lambda x: GenusSymbol(x[1]), B)
     modules = Set(B)
+    print modules
     modules_unique = list()
     for M in modules:                               
         seen = False                                 
         for N in modules_unique:
-            if N.is_isomorphic(M):
+            if N.defines_isomorphic_module(M):
                 seen = True
         if not seen:
             modules_unique.append(M)
-    return [M.jordan_decomposition().genus_symbol() for M in modules_unique]
-
+    return modules_unique
 
 def all_symbols(sign,rank,D):
     symbols=list()
