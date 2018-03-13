@@ -1,6 +1,8 @@
 r"""
 Class representing a space of vector valued modular forms
 transforming with the Weil representation of a discriminant module.
+
+THIS IS JUST A TEST.
 ...
 
 AUTHORS:
