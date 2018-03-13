@@ -1,1 +1,0 @@
-from period_polynomials import PeriodPolynomial 
