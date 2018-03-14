@@ -44,8 +44,8 @@ if '-np' in sys.argv:
 else:
     INSTALL_PSAGE = True
     print 'Also installing psage dependencies...'
-    pt = tarfile.open('psage.tar.bz2', mode='r:bz2')
-    pt.extractall()
+    #pt = tarfile.open('psage.tar.bz2', mode='r:bz2')
+    #pt.extractall()
 
 #from module_list import ext_modules,aliases
 
@@ -124,8 +124,8 @@ ext_modules = [
 if INSTALL_PSAGE:
     ext_modules.extend(
                        [
-                        Extension('psage.modules.weil_invariants',
-                                  sources = ['psage/modules/weil_invariants.pyx'],
+                        Extension('psage.external.weil_invariants.weil_ivariants',
+                                  sources = ['psage/external/weil_invariants/weil_invariants.pyx'],
                                   libraries = ['m'],
                                   extra_compile_args = ["-O3", "-ffast-math", "-march=native", "-fopenmp" ],
                                   extra_link_args=['-fopenmp']
