@@ -983,7 +983,7 @@ class GenusSymbol(object):
         if debug > 0:
             print "N={0}".format(N)
         for p in N.prime_factors():
-            c = self.jordan_component(p)._symbol_dict[p][0]
+            c = self.jordan_components(p)[0]._symbol_dict[p][0]
             if len(c) == 3:
                 if c[1] == 2:
                     q = q * p
