@@ -1435,6 +1435,45 @@ class GenusSymbol(object):
         else:
             return False
 
+    def is_additive_lift_injective(self, r, s):
+        # Checks if the genus symbol admits
+        # a global lattice representation
+        # that splits a hyperbolic plane and a scaled
+        # hyperbolic plane
+        # If this is true, the additive theta lift is injective.
+        # TODO: add references.
+        if self.is_global(r-2,s-2):
+            # splits two hyperbolic planes
+            return True
+        if self.is_global(r-1,s-1):
+            # splits a hyperbolic plane
+            splits = False
+            for p in self.level().prime_divisors():
+                eps = "+" if p % 4 == 1 else "-"
+                if p == 2:
+                    eps = '+'
+                print p, eps
+                for n in range(1,self.level().valuation(p)+1):
+                    if self.jordan_component(p**n).level() > 1:
+                        print p**n
+                        try:
+                            o = self - GenusSymbol(str(p**n) + '^' + eps + '2')
+                            print o
+                            splits = True
+                            break
+                        except:
+                            continue
+                if splits:
+                    break
+            if splits:
+                return True
+            else:
+                return False
+        else:
+            return False
+                        
+                            
+
     def is_global(self, r, s, even=True):
         r""" Checks if this symbol can be realized as
              the genus symbol of an (even if flag is set) integral lattice

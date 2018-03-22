@@ -38,8 +38,12 @@ NCPUS0 = 4
 NCPUS1 = 10
 
 @parallel(ncpus=NCPUS1)
-def check_simple(s, k, reduction = False, bound = 0):
-    return s.is_simple(k, reduction=reduction, bound=bound)
+def check_simple(s, k, reduction = False, bound = 0, check_injectivity_criterion=False, p=0, q=0):
+    simple = s.is_simple(k, reduction=reduction, bound=bound)
+    if not simple and check_injectivity_criterion:
+        return (not s.is_additive_lift_injective(p,q))
+    else:
+        return simple
 
 def prime_pol(s, p, k):
     A = RR(s.order())
@@ -126,7 +130,7 @@ class SimpleModulesGraph(DiGraph):
     """
 
     def __init__(self, signature=0, weight=2, level_limit=34, rank_limit=4, primes=None, simple_color=None, nonsimple_color=None,
-                 reduction=True, bound=0):
+                 reduction=True, bound=0, check_injectivity_criterion=False, r=0, s=0):
         """
             Initialize a SimpleModulesGraph containing finite quadratic modules of signature ``signature``.
             They are checked for being ``weight``-simple if their minimal number of generators
@@ -152,6 +156,10 @@ class SimpleModulesGraph(DiGraph):
         self._weight = QQ(weight)
         self._reduction = reduction
         self._bound = bound
+        self._check_injectivity_criterion = check_injectivity_criterion
+        self._r = r
+        self._s = s
+        logger.debug("Check: {0}".format(self._check_injectivity_criterion))
         #########################################################
         # Initialize the primes that need to be checked
         # According to Theorem 4.21 in [BEF],
@@ -227,7 +235,7 @@ class SimpleModulesGraph(DiGraph):
     @parallel(ncpus=NCPUS0)
     def _compute_simple_modules_graph_from_startpoint_parallel(self, s, p=None, cut_nonsimple_aniso=True, fast=1):
         G = SimpleModulesGraph(
-            self._signature, self._weight, self._level_limit, self._rank_limit, self._primes, reduction=self._reduction, bound=self._bound)
+            self._signature, self._weight, self._level_limit, self._rank_limit, self._primes, reduction=self._reduction, bound=self._bound, check_injectivity_criterion=self._check_injectivity_criterion, r=self._r, s=self._s)
         G._compute_simple_modules_graph_from_startpoint(
             s, p, cut_nonsimple_aniso, fast)
         return G
@@ -240,7 +248,7 @@ class SimpleModulesGraph(DiGraph):
         ###########################################################
         # Determine which primes need to be checked
         # According to the proof of Proposition XX in [BEF], we
-        # only need to check primesnot dividing the 6*level(s),
+        # only need to check primes not dividing the 6*level(s),
         # for which prime_pol(s,p,k) <= 0.
         # For those primes, we check if there is any
         # k-simple fqm in s.C(p) and if not, we do not have to
@@ -256,7 +264,7 @@ class SimpleModulesGraph(DiGraph):
                         "Smallest prime not dividing 6*level({0}) = {1} is p = {2}".format(s, Integer(6) * s.level(), q))
                     p = q
                     break
-            while prime_pol(s, p, k) <= 0 or p in slp:
+            while prime_pol(s, p, k) <= self._bound or p in slp:
                 p = next_prime(p)
             p = uniq(prime_range(p) + slp)
         logger.info("Starting with s = {0} and primes = {1}".format(s, p))
@@ -267,6 +275,9 @@ class SimpleModulesGraph(DiGraph):
             primes = [p]
 
         simple = s.is_simple(k, reduction = self._reduction, bound = self._bound)
+        if self._check_injectivity_criterion and not simple:
+            simple = not s.is_additive_lift_injective(self._r, self._s)
+            logger.info("Checked injectivity for non-simple module {0} in signature ({2}, {3}): {1}".format(s,simple, self._r, self._s))
         
         if not simple:
             logger.info("{0} is not simple.".format(s))
@@ -289,7 +300,8 @@ class SimpleModulesGraph(DiGraph):
                 p = primes[i]
                 fs = False
                 for t in s.genus_symbol().C(p, False):
-                    if t.is_simple(k, bound = self._bound):
+                    if t.is_simple(k, bound = self._bound) \
+                       or (self._check_injectivity_criterion and not t.is_additive_lift_injective(self._r, self._s)):
                         fs = True
                         logger.debug("Setting fs = True")
                         break
@@ -341,7 +353,7 @@ class SimpleModulesGraph(DiGraph):
                     # check if we really need to check p for s1
                     # otherwise none of the fqm's in s1.C(p) are simple
                     # and we will not consider them.
-                    if prime_pol(s1.genus_symbol(), p, k) <= 0:
+                    if prime_pol(s1.genus_symbol(), p, k) <= self._bound:
                         Bs2 = Bs2 + s1.genus_symbol().C(p, False)
                     else:
                         logger.info(
@@ -386,7 +398,8 @@ class SimpleModulesGraph(DiGraph):
                         if not vertex_colors[nonsimple_color].count(s2) > 0:
                             vertex_colors[nonsimple_color].append(s2)
                     else:
-                        checklist.append((s2, k, self._reduction, self._bound))
+                        logger.debug("Check injectivity: {0} ({1},{2})".format(self._check_injectivity_criterion, self._r, self._s))
+                        checklist.append((s2, k, self._reduction, self._bound, self._check_injectivity_criterion, self._r, self._s))
             logger.debug("checklist = {0}".format(checklist))
             # check the modules in checklist
             # for being k-simple
@@ -623,6 +636,9 @@ class FQM_vertex(object):
     @cached_method
     def is_simple(self, k, reduction=True, bound=0):
         return self._genus_symbol.is_simple(k, reduction=reduction, bound=bound)
+
+    def is_additive_lift_injective(self, r, s):
+        return self._genus_symbol.is_additive_lift_injective(r,s)
 
     def __eq__(self, o):
         if o.genus_symbol() == self.genus_symbol():
@@ -875,3 +891,6 @@ def get_symbol_string(sym):
 
 def SimpleModulesGraph2n(n, aniso_level_limit, **kwds):
     return SimpleModulesGraph((2 - n) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, **kwds)
+
+def SimpleModulesGraphn2(n, aniso_level_limit, **kwds):
+    return SimpleModulesGraph((n-2) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, r=2, s=n, **kwds)
