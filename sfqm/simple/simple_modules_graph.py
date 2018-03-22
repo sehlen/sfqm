@@ -40,7 +40,7 @@ NCPUS1 = 10
 @parallel(ncpus=NCPUS1)
 def check_simple(s, k, reduction = False, bound = 0, check_injectivity_criterion=False, p=0, q=0):
     simple = s.is_simple(k, reduction=reduction, bound=bound)
-    if not simple and check_injectivity_criterion:
+    if (not simple) and check_injectivity_criterion:
         return (not s.is_additive_lift_injective(p,q))
     else:
         return simple
