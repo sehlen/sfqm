@@ -54,7 +54,7 @@ def prime_pol(s, p, k):
 def prime_pol_simple(p, k):
     p = RR(p)
     k = RR(k)
-    return (k - 1) - 36*p / (p**2 - 1)
+    return (p**2-1)*(k - 1)/24 - 0.5*p
 
 
 class ColorFormatter(logging.Formatter):
@@ -154,9 +154,9 @@ class SimpleModulesGraph(DiGraph):
         self._bound = bound
         #########################################################
         # Initialize the primes that need to be checked
-        # According to Proposition XX in [BEF],
+        # According to Theorem 4.21 in [BEF],
         # in the worst case, we need to check primes p for which
-        # prime_pol_simple(p, weight) <= 0.
+        # prime_pol_simple(p, weight) <= bound.
         #########################################################
         if primes is None:
             p = 2
