@@ -40,7 +40,7 @@ NCPUS1 = 10
 @parallel(ncpus=NCPUS1)
 def check_simple(s, k, reduction = False, bound = 0, check_injectivity_criterion=False, p=0, q=0):
     simple = s.is_simple(k, reduction=reduction, bound=bound)
-    if not simple and check_injectivity_criterion:
+    if (not simple) and check_injectivity_criterion:
         return (not s.is_additive_lift_injective(p,q))
     else:
         return simple
@@ -893,4 +893,4 @@ def SimpleModulesGraph2n(n, aniso_level_limit, **kwds):
     return SimpleModulesGraph((2 - n) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, **kwds)
 
 def SimpleModulesGraphn2(n, aniso_level_limit, **kwds):
-    return SimpleModulesGraph((n-2) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, r=2, s=n, **kwds)
+    return SimpleModulesGraph((n-2) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, r=n, s=2, **kwds)
