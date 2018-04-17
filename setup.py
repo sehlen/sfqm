@@ -128,7 +128,7 @@ ext_modules = [
 if INSTALL_PSAGE:
     ext_modules.extend(
                        [
-                        Extension('psage.external.weil_invariants.weil_ivariants',
+                        Extension('psage.external.weil_invariants.weil_invariants',
                                   sources = ['psage/psage/external/weil_invariants/weil_invariants.pyx'],
                                   libraries = ['m'],
                                   extra_compile_args = ["-O3", "-ffast-math", "-march=native", "-fopenmp" ],
