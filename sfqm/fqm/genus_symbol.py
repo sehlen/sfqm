@@ -1946,7 +1946,15 @@ class GenusSymbol(object):
     def __str__(self):
         return self._to_string()
 
+    def __ladd__(self, other):
+        return self.__add__(other)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __add__(self, other):
+        if other == 0:
+            return deepcopy(self)
         d = deepcopy(self._symbol_dict)
         e = other._symbol_dict
         for p, l in e.iteritems():
