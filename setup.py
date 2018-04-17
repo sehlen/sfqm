@@ -202,16 +202,6 @@ import distutils
 #from distutils.core import setup
 from setuptools import setup
 
-if '-np' in sys.argv:
-    print 'Not including psage in build'
-    sys.argv.remove('-np')
-    INSTALL_PSAGE = False
-else:
-    INSTALL_PSAGE = True
-    print 'Also installing psage dependencies...'
-    pt = tarfile.open('psage.tar.bz2', mode='r:bz2')
-    pt.extractall()
-
 
 
 packages = [
