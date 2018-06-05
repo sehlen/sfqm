@@ -1435,6 +1435,34 @@ class GenusSymbol(object):
         else:
             return False
 
+    def splits_hyperbolic_plane(self, r, s):
+        if self.is_global(r-1,s-1):
+            return True
+
+    def splits_rescaled_hyperbolic_plane(self, r, s):
+        splits = False
+        for p in self.level().prime_divisors():
+            eps = "+" if p % 4 == 1 else "-"
+            if p == 2:
+                eps = '+'
+            print p, eps
+            for n in range(1,self.level().valuation(p)+1):
+                if self.jordan_component(p**n).level() > 1:
+                    print p**n
+                    try:
+                        o = self - GenusSymbol(str(p**n) + '^' + eps + '2')
+                        print o
+                        splits = True
+                        break
+                except:
+                    continue
+            if splits:
+                break
+        if splits:
+            return True
+        else:
+            return False
+
     def is_additive_lift_injective(self, r, s):
         # Checks if the genus symbol admits
         # a global lattice representation
@@ -1442,6 +1470,13 @@ class GenusSymbol(object):
         # hyperbolic plane
         # If this is true, the additive theta lift is injective.
         # TODO: add references.
+        return splits_hyperbolic_plane_and_scaled_hyperbolic_plane(r, s)
+
+    def splits_hyperbolic_plane_and_scaled_hyperbolic_plane(self, r, s):
+        # Checks if the genus symbol admits
+        # a global lattice representation
+        # that splits a hyperbolic plane and a scaled
+        # hyperbolic plane
         if self.is_global(r-2,s-2):
             # splits two hyperbolic planes
             return True
@@ -1985,7 +2020,15 @@ class GenusSymbol(object):
     def __str__(self):
         return self._to_string()
 
+    def __ladd__(self, other):
+        return self.__add__(other)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __add__(self, other):
+        if other == 0:
+            return deepcopy(self)
         d = deepcopy(self._symbol_dict)
         e = other._symbol_dict
         for p, l in e.iteritems():
