@@ -1438,24 +1438,33 @@ class GenusSymbol(object):
     def splits_hyperbolic_plane(self, r, s):
         if self.is_global(r-1,s-1):
             return True
+        else:
+            return False
 
     def splits_rescaled_hyperbolic_plane(self, r, s):
+        if self.splits_hyperbolic_plane(r, s):
+            return True
         splits = False
-        for p in self.level().prime_divisors():
-            eps = "+" if p % 4 == 1 else "-"
-            if p == 2:
-                eps = '+'
-            print p, eps
-            for n in range(1,self.level().valuation(p)+1):
+        for d in self.level().divisors():
+            if d == 1:
+                continue
+            o = self
+            print d
+            for p in d.prime_divisors():
+                eps = "+" if p % 4 == 1 else "-"
+                if p == 2:
+                    eps = '+'
+                print p, eps
+                n = self.level().valuation(p)
                 if self.jordan_component(p**n).level() > 1:
                     print p**n
                     try:
-                        o = self - GenusSymbol(str(p**n) + '^' + eps + '2')
-                        print o
+                        o -= GenusSymbol(str(p**n) + '^' + eps + '2')
                         splits = True
-                        break
+                        print o
                     except:
-                        continue
+                        splits = False
+                        break
             if splits:
                 break
         if splits:
