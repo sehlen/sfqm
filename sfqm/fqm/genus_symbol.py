@@ -1441,8 +1441,10 @@ class GenusSymbol(object):
         else:
             return False
 
-    def splits_scaled_hyperbolic_plane(self, r, s):
+    def splits_scaled_hyperbolic_plane(self, r, s):        
         if not self.is_global(r,s):
+            return False
+        if not r>0 and s>0:
             return False
         if self.splits_hyperbolic_plane(r, s):
             return True
