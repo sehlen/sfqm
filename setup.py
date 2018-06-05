@@ -37,6 +37,8 @@ if '-ba' in sys.argv:
 else:
     FORCE = False
 
+package_dir = {}
+    
 if '-np' in sys.argv:
     print 'Not including psage in build'
     sys.argv.remove('-np')
@@ -46,6 +48,8 @@ else:
     print 'Also installing psage dependencies...'
     #pt = tarfile.open('psage.tar.bz2', mode='r:bz2')
     #pt.extractall()
+    package_dir = {'psage': 'psage/psage'}
+    print package_dir
 
 #from module_list import ext_modules,aliases
 
@@ -124,8 +128,8 @@ ext_modules = [
 if INSTALL_PSAGE:
     ext_modules.extend(
                        [
-                        Extension('psage.external.weil_invariants.weil_ivariants',
-                                  sources = ['psage/external/weil_invariants/weil_invariants.pyx'],
+                        Extension('psage.external.weil_invariants.weil_invariants',
+                                  sources = ['psage/psage/external/weil_invariants/weil_invariants.pyx'],
                                   libraries = ['m'],
                                   extra_compile_args = ["-O3", "-ffast-math", "-march=native", "-fopenmp" ],
                                   extra_link_args=['-fopenmp']
@@ -202,16 +206,6 @@ import distutils
 #from distutils.core import setup
 from setuptools import setup
 
-if '-np' in sys.argv:
-    print 'Not including psage in build'
-    sys.argv.remove('-np')
-    INSTALL_PSAGE = False
-else:
-    INSTALL_PSAGE = True
-    print 'Also installing psage dependencies...'
-    pt = tarfile.open('psage.tar.bz2', mode='r:bz2')
-    pt.extractall()
-
 
 
 packages = [
@@ -240,4 +234,5 @@ code = setup(
     platforms = ['any'],
     download_url = 'http://www.github.com/sehlen/sfqm',
     ext_modules = ext_modules,
+    package_dir = package_dir
 )
