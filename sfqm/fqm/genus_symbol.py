@@ -1441,7 +1441,11 @@ class GenusSymbol(object):
         else:
             return False
 
-    def splits_rescaled_hyperbolic_plane(self, r, s):
+    def splits_scaled_hyperbolic_plane(self, r, s):
+        if not self.is_global(r,s):
+            return False
+        if self.splits_hyperbolic_plane(r, s):
+            return True
         splits = False
         for p in self.level().prime_divisors():
             eps = "+" if p % 4 == 1 else "-"
@@ -1454,7 +1458,8 @@ class GenusSymbol(object):
                     try:
                         o = self - GenusSymbol(str(p**n) + '^' + eps + '2')
                         print o
-                        splits = True
+                        if o.is_global(r-1,s-1):
+                            splits = True
                         break
                     except:
                         continue
