@@ -1463,7 +1463,7 @@ class GenusSymbol(object):
                     try:
                         o -= GenusSymbol(str(p**n) + '^' + eps + '2')
                         splits = True
-                        print o
+                        print "o = {}".format(o)
                     except:
                         splits = False
                         break
@@ -1983,6 +1983,8 @@ class GenusSymbol(object):
                 else:
                     sgn = '+' if (s[2] == 1) else '-'
                     symstr = symstr + '^' + sgn + str(s[1])
+        if symstr == '':
+            symstr = '1^+1'
         return symstr
 
     def _reduce(self):
