@@ -1454,8 +1454,8 @@ class GenusSymbol(object):
                         print o
                         splits = True
                         break
-                except:
-                    continue
+                    except:
+                        continue
             if splits:
                 break
         if splits:
