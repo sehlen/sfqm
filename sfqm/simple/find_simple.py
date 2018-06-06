@@ -2,11 +2,11 @@ from sfqm.simple.find_simple_c import _find_simple_anisotropic
 from sage.all import Integer, is_squarefree, is_even, is_odd, squarefree_part, walltime, RR, uniq
 from sage.parallel.decorate import *
 
-@parallel
-def find_simple_anisotropic_wrapper(lower, upper, max_order=None, sig=None, k=None, weights=range(2, Integer(27)/2), test_dim=True, dynamic=True, only_2_n=False, reduction=False):
-    return _find_simple_anisotropic(lower, upper, max_order, sig, k, weights, test_dim, dynamic, only_2_n, reduction)
+@parallel(ncpus=4)
+def find_simple_anisotropic_wrapper(lower, upper, max_order=None, sig=None, k=None, weights=range(2, Integer(27)/2), test_dim=True, dynamic=True, only_2_n=False, reduction=False, bound=0):
+    return _find_simple_anisotropic(lower, upper, max_order, sig, k, weights, test_dim, dynamic, only_2_n, reduction, bound)
 
-def find_simple_anisotropic(num, s, weights=range(2, Integer(27)/2), dynamic=True, lower=1, only_2_n=False, reduction=False):
+def find_simple_anisotropic(num, s, weights=range(2, Integer(27)/2), dynamic=True, lower=1, only_2_n=False, reduction=False, bound=0):
     r"""
       Test for anisotropic $k$-simple fqm's for $k$ in weights.
 
@@ -17,9 +17,9 @@ def find_simple_anisotropic(num, s, weights=range(2, Integer(27)/2), dynamic=Tru
 
       TODO: don't mix level and order!
     """
-    return find_simple_anisotropic_parallel(num, s, weights, dynamic, lower, only_2_n, reduction)
+    return find_simple_anisotropic_parallel(num, s, weights, dynamic, lower, only_2_n, reduction, bound)
 
-def find_simple_anisotropic_parallel(num, s, weights=range(2, Integer(27)/2), dynamic=True, lower=1, only_2_n=False, reduction=False):
+def find_simple_anisotropic_parallel(num, s, weights=range(2, Integer(27)/2), dynamic=True, lower=1, only_2_n=False, reduction=False, bound=0):
     r"""
       Test for anisotropic $k$-simple fqm's for $k$ in weights.
 
@@ -34,7 +34,7 @@ def find_simple_anisotropic_parallel(num, s, weights=range(2, Integer(27)/2), dy
     m = round(RR(num) / s)
     args = [(m * a + lower, min(m * (a + lower), lower + num - 1),
                           lower + num - 1, None, None, weights, True, dynamic,
-                          only_2_n, reduction) for a in range(s)]
+                          only_2_n, reduction, bound) for a in range(s)]
     tests = find_simple_anisotropic_wrapper(args)
     done = 0
 
