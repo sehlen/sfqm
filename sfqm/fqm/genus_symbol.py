@@ -1459,7 +1459,7 @@ class GenusSymbol(object):
                 if p == 2:
                     eps = '+'
                 #print p, eps
-                n = self.level().valuation(p)
+                n = d.valuation(p)
                 if self.jordan_component(p**n).level() > 1:
                     #print p**n
                     try:

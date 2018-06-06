@@ -60,8 +60,10 @@ def prime_pol_simple(p, k):
     k = RR(k)
     return (p**2-1)*(k - 1)/24 - 0.5*p
 
-def aniso_bound(d, k, bound=0):
-    f = RR((d+1)*(k+1))/24-3-0.86*d**(RR(5)/8)*log(2*d)
+def aniso_bound(k, bound=0):
+    f = lambda d: RR((d+1)*(k+1))/24-3-0.86*d**(RR(5)/8)*log(2*d)
+    
+    
 
 
 class ColorFormatter(logging.Formatter):
@@ -909,7 +911,7 @@ def ModulesForSingularWeight(n, aniso_level_limit, bound=1, **kwds):
         if splits:
             ll.append((str(s), N, s.dimension_cusp_forms((2+n)/2)))
     if len(l) == len(ll):
-        print "All symbols split a scaled hyperbolic plane"
+        print "All symbols are global and split a scaled hyperbolic plane"
     else:
-        print "{0}/{0} symbols split a scaled hyperbolic plane".format(len(l), len(ll))
+        print "{1}/{0} symbols split are global and a scaled hyperbolic plane".format(len(l), len(ll))
     return ll
