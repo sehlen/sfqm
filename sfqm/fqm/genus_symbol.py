@@ -1453,7 +1453,7 @@ class GenusSymbol(object):
             if d == 1:
                 continue
             o = self
-            print d
+            #print d
             for p in d.prime_divisors():
                 eps = "+" if p % 4 == 1 else "-"
                 if p == 2:
