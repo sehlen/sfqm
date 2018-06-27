@@ -143,11 +143,11 @@ class VectorValuedModularForms(SageObject):
         if (2*k+s)%4 == 0:
             d = Integer(1)/Integer(2)*(m+n2) # |dimension of the Weil representation on even functions|
             self._d = d
-            self._alpha4 = 1/Integer(2)*(vals[0]+v2) # the codimension of SkL in MkL
+            if not self._aniso_formula: self._alpha4 = 1/Integer(2)*(vals[0]+v2) # the codimension of SkL in MkL
         else:
             d = Integer(1)/Integer(2)*(m-n2) # |dimension of the Weil representation on odd functions|
             self._d = d
-            self._alpha4 = 1/Integer(2)*(vals[0]-v2) # the codimension of SkL in MkL
+            if not self._aniso_formula: self._alpha4 = 1/Integer(2)*(vals[0]-v2) # the codimension of SkL in MkL
             
         prec = ceil(max(log(M.order(),2),52)+1)+17
         #print prec
@@ -160,7 +160,7 @@ class VectorValuedModularForms(SageObject):
         if self._alpha3 is None or self._last_eps != eps:
             self._last_eps = eps
             if self._aniso_formula:
-                self._alpha4 = 1
+                self._alpha4 = 1 if eps == 1 else 0
                 self._alpha3 = -sum([BB(a)*mm for a,mm in self._v2.iteritems() if a != 0])
                 #print self._alpha3
                 self._alpha3 += Integer(d) - Integer(1) - self._g.beta_formula()
