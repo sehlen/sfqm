@@ -1441,41 +1441,40 @@ class GenusSymbol(object):
         else:
             return False
 
-    def splits_scaled_hyperbolic_plane(self, r, s):
+    def splits_scaled_hyperbolic_plane(self, r, s, return_factor=False):        
         if not self.is_global(r,s):
             return False
+        if not (r>0 and s>0):
+            return False
         if self.splits_hyperbolic_plane(r, s):
-            return True
+            return (True, 1)
         splits = False
         for d in self.level().divisors():
             if d == 1:
                 continue
             o = self
-            print d
+            #print d
             for p in d.prime_divisors():
                 eps = "+" if p % 4 == 1 else "-"
                 if p == 2:
                     eps = '+'
-                print p, eps
-                n = self.level().valuation(p)
+                #print p, eps
+                n = d.valuation(p)
                 if self.jordan_component(p**n).level() > 1:
-                    print p**n
+                    #print p**n
                     try:
                         o -= GenusSymbol(str(p**n) + '^' + eps + '2')
                         splits = True
-                        print o
+                        #print "o = {}".format(o)
                     except:
                         splits = False
                         break
             if splits:
                 if o.is_global(r-1,s-1):
-                    break
+                    return (True, d)
                 else:
                     splits = False
-        if splits:
-            return True
-        else:
-            return False
+        return False
 
     def is_additive_lift_injective(self, r, s):
         # Checks if the genus symbol admits
@@ -1983,6 +1982,8 @@ class GenusSymbol(object):
                 else:
                     sgn = '+' if (s[2] == 1) else '-'
                     symstr = symstr + '^' + sgn + str(s[1])
+        if symstr == '':
+            symstr = '1^+1'
         return symstr
 
     def _reduce(self):

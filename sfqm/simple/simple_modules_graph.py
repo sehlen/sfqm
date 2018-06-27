@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 #from Bsets import dict_to_genus_symbol_string, genus_symbol_string_to_dict, Bbf
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, log, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
 from sage.parallel.decorate import *
 from sage.misc.cachefunc import *
 import itertools
@@ -59,6 +59,11 @@ def prime_pol_simple(p, k):
     p = RR(p)
     k = RR(k)
     return (p**2-1)*(k - 1)/24 - 0.5*p
+
+def aniso_bound(k, bound=0):
+    f = lambda d: RR((d+1)*(k+1))/24-3-0.86*d**(RR(5)/8)*log(2*d)
+    
+    
 
 
 class ColorFormatter(logging.Formatter):
@@ -894,3 +899,19 @@ def SimpleModulesGraph2n(n, aniso_level_limit, **kwds):
 
 def SimpleModulesGraphn2(n, aniso_level_limit, **kwds):
     return SimpleModulesGraph((n-2) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, r=n, s=2, **kwds)
+
+def ModulesForSingularWeight(n, aniso_level_limit, bound=1, **kwds):
+    G = SimpleModulesGraph2n(n, aniso_level_limit, bound=bound, **kwds)
+    l = G.compute()
+    ll = []
+    for s in l:
+        splits = s.splits_scaled_hyperbolic_plane(2,n)
+        if type(splits) == tuple:
+            splits, N = splits
+        if splits:
+            ll.append((str(s), N, s.dimension_cusp_forms((2+n)/2)))
+    if len(l) == len(ll):
+        print "All symbols are global and split a scaled hyperbolic plane"
+    else:
+        print "{1}/{0} symbols split are global and a scaled hyperbolic plane".format(len(l), len(ll))
+    return ll
