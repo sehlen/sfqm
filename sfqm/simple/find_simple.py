@@ -119,7 +119,6 @@ def simple_t1_genus_symbols(Nr=range(1,100), ar=range(1,100), precomputed=None):
             if added: break
         if not added:
             print "{0} not of type t1".format(s)
-                    
     return res, filter(lambda x: x not in res, l)
 
 def contains_isomorphic_module(l, s):
@@ -128,4 +127,21 @@ def contains_isomorphic_module(l, s):
             print t
             return t
     return None
-    
+
+
+def theoretical_upper_bound_anisotropic(k, lower_bound = 0):
+    # find a theoretical upper bound B for the order of
+    # an anisotropic(!) finite quadratic module A, such that the dimension
+    # of the space of cusp forms of weight k for
+    # the (dual) Weil representation attached to A
+    # is <= lower_bound, i.e., if |A| > B,
+    # then dim S(k,A) > lower_bound.
+    # We use the estimate from Corollary 4.13 in [BEF].
+    from sage.all import RR, var
+    var('x')
+    bf = (x+1)*(k-1)/Integer(24) - 3 - 0.86 * x**(5/Integer(8))*log(2*x) - lower_bound
+    r = find_root(bf,1,lower_bound*5e7)
+    r = round(RR(r))+1
+    if not bf(x=r) > 0:
+        raise RuntimeError
+    return r
