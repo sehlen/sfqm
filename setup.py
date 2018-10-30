@@ -217,8 +217,11 @@ packages = [
 if INSTALL_PSAGE:
     packages.extend(
         [
-          'psage.modules',
-          'psage.modform.weilrep_tools'
+            'psage.modules',
+            'psage.modform',
+            'psage.modform.weilrep_tools',
+            'psage.external',
+            'psage.external.weil_invariants'
         ]
     )
 
