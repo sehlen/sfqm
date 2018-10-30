@@ -22,14 +22,17 @@ TESTS:
 #                  http://www.gnu.org/licenses/
 ###############################################################################
 
-include 'cysignals/signals.pxi'
-include '../ext/stdsage.pxi'
+
 
 
 # set rounding to be nearest integer
-# TODO: make t possible to change rounding 
+# TODO: make t possible to change rounding
+from sage.libs.mpfr.types cimport MPFR_RNDN
+from sage.libs.mpfr cimport *
+from sage.libs.mpfr cimport mpfr_init2,mpfr_set_si,mpfr_sub
+
 cdef mpfr_rnd_t rnd
-rnd = GMP_RNDN
+rnd = MPFR_RNDN
 
 from sage.structure.element cimport Element, ModuleElement, RingElement, Vector
 from sage.all import FreeModule
@@ -73,7 +76,7 @@ cdef class Vector_real_mpfr_dense(FreeModuleElement):
         self._parent = parent
         self._base_ring=parent._base
         self._prec = self._base_ring.__prec
-        self._entries = <mpfr_t *> sage_malloc(sizeof(mpfr_t) * degree)
+        self._entries = <mpfr_t *> sig_malloc(sizeof(mpfr_t) * degree)
         #print "_inite entries=",<int>self._entries
         #print "_inite pprec=",self._prec
         if self._entries == NULL:
@@ -128,7 +131,7 @@ cdef class Vector_real_mpfr_dense(FreeModuleElement):
                 mpfr_clear(self._entries[i])
             sig_off()
             #print "clearing python entries"
-            sage_free(self._entries)
+            sig_free(self._entries)
 
     cpdef base_ring(self):
         return self._base_ring

@@ -1,7 +1,3 @@
-#include "sage/ext/stdsage.pxi"
-include "sage/ext/cdefs.pxi"
-#include "sage/rings/mpc.pxi"
-#include "sage/ext/gmp.pxi"
 from psage.rings.mpfr_nogil cimport *
 from psage.modules.vector_complex_dense cimport Vector_complex_dense
 from sage.matrix.matrix_dense cimport Matrix_dense
@@ -68,6 +64,7 @@ cdef class Matrix_complex_dense(Matrix_dense):
 
     cpdef  set_zero_elements(self,double tol=?)
     cpdef int numerical_rank(self,double tol=?)
+    cpdef list singular_values(self)
     cpdef _balance(self)
     cpdef int is_hessenberg(self,double maxerr=?,int show_err=?)
 

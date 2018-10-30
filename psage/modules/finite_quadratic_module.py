@@ -874,8 +874,8 @@ class FiniteQuadraticModule_ambient (AbelianGroup):
         if not isinstance(U, FiniteQuadraticModule_subgroup) or U.ambience() is not self or not U.is_isotropic():
             raise ValueError, "%s: not an isotropic subgroup" %U
         V = U.dual()
-        K = matrix( V)
-        return FiniteQuadraticModule( K**(-1)*matrix(U), K.transpose()*self.__J*K)
+        K =  V._matrix_()
+        return FiniteQuadraticModule( K**(-1)*U._matrix_(), K.transpose()*self.__J*K)
 
 
     def __div__( self, U):
@@ -1000,7 +1000,7 @@ class FiniteQuadraticModule_ambient (AbelianGroup):
             $2H^tJx$ by the unit matrix and solving the  corresonding
             system of linear equations over $\ZZ$
         """
-        H = matrix( U)
+        H = U._matrix_()
         X = 2*H.transpose()*self.__J
         n = len(self.elementary_divisors())
         Y = X.augment( MatrixSpace(QQ,n).identity_matrix())
@@ -2619,7 +2619,9 @@ class FiniteQuadraticModule_subgroup(AbelianGroup):
         self.__hnf_gens = [ ambience( list( x), can_coords = False) for x in self.__lattice.matrix()]
         Mat = MatrixSpace( ZZ, len( self.__hnf_gens))
         # TODO: why is this coercion necessary? (SAGE returns rat. matrices for ZZ-lattices)
-        self.__hnf_matrix = Mat( self.__lattice.matrix().transpose())
+        self.__hnf_matrix = Mat(self.__lattice.matrix().transpose())
+        #print self.__hnf_matrix
+        #print type(self.__hnf_matrix)
         # throw out 0's, if list becomes empty set to [ambience(0)]
         z = ambience(0); self.__hnf_gens = [ g for g in self.__hnf_gens if g != z ]
         if 0 == len( self.__hnf_gens): self.__hnf_gens = [z]
@@ -2766,7 +2768,7 @@ class FiniteQuadraticModule_subgroup(AbelianGroup):
         BUG
         determinant is buggy (workaround: set option 'proof = False'
         """
-        return Integer(self.ambience().order()/matrix(self).determinant( proof = False))
+        return Integer(self.ambience().order()/self._matrix_().determinant( proof = False))
 
 
     def level( self):
@@ -2831,8 +2833,8 @@ class FiniteQuadraticModule_subgroup(AbelianGroup):
         if not ambience is V.ambience():
             raise ValueError
         lat0 = diagonal_matrix( ZZ, list(ambience.elementary_divisors())).column_module()
-        lat1 = matrix( self).column_module() + lat0
-        lat2 = matrix( V).column_module() + lat0
+        lat1 = self._matrix_().column_module() + lat0
+        lat2 = V._matrix_().column_module() + lat0
         lat = lat1.intersection( lat2)
         return ambience.subgroup( [ ambience( list( x), can_coords = False) for x in lat.matrix()])
 
@@ -2925,15 +2927,15 @@ class FiniteQuadraticModule_subgroup(AbelianGroup):
 
     
     def __le__( self, other):
-        return self._divides( matrix( other), matrix( self))
+        return self._divides( other._matrix_(), self._matrix_())
 
 
     def __eq__( self, other):
-        return  matrix( self) == matrix( other)
+        return  self._matrix_() ==  other._matrix_()
 
 
     def __ne__( self, other):
-        return  matrix( self) != matrix( other)
+        return  self._matrix_() != other._matrix_()
     
 
     def __gt__( self, other):
@@ -2945,7 +2947,7 @@ class FiniteQuadraticModule_subgroup(AbelianGroup):
         EXAMPLES NONE        
         Test here all of the above
         """
-        return self._divides( matrix( self), matrix( other))
+        return self._divides( self._matrix_(), other._matrix_())
 
 
     ###################################
@@ -3156,6 +3158,9 @@ class JordanDecomposition( SageObject):
         EXAMPLES NONE
         """
         return 'Jordan decomposition'
+
+    def _jordan_decomposition_data( self):
+        return copy(self.__jd)
 
 
     def __iter__( self):
