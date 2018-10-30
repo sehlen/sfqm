@@ -7,7 +7,7 @@ from sage.parallel.decorate import *
 # Testing functions
 #########################################
 
-def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(2, Integer(27)/2), test_dim=True, dynamic=True, only_2_n=False, reduction=False):
+def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(2, Integer(27)/2), test_dim=True, dynamic=True, only_2_n=False, reduction=False, bound=0):
     r"""
       ```find_simple_anisotropic``` computes a list of all anisotropic finite quadratic modules
       up to a given maximal order ```max_order``` that are $k$-simple for given weights.
@@ -22,6 +22,7 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
       - test_dim: boolean,
       - dynamic: boolean,
       - only_2_n: boolean,
+      - bound: consider the module to be simple if dimension is less or equal to this bound
     """
 
     # type checking
@@ -52,8 +53,8 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
             if is_even(N):
                 if not Integer(N) / squarefree_part(N) in [4, 8]:
                     continue
-        if d >= 0:
-            # if the last computed dimension was non-negative,
+        if d >= bound:
+            # if the last computed dimension was at least our bound,
             # we first ignore the quadratic form and
             # do the simplest possible check
             # that does only depend on the structure of the
@@ -84,7 +85,7 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
                 if numpos >= 10 * len(weights):
                     usedyn = False
                 d = s.dimension_estimate_for_anisotropic(kk, usedyn and dynamic)
-                if d <= 0:
+                if d <= bound:
                     check = True # check exact dimension
                     numpos = 0
                     usedyn = True
@@ -107,8 +108,8 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
                         t1 = ss.signature() % 8 == (4 - 2*kk) % 8
                     else:
                         t1 = ss.signature() % 4 == (-2*kk) % 4
-                    if t1 and s.dimension_estimate_for_anisotropic(kk, usedyn and dynamic) <= 0:
-                        if ss.is_simple(kk, no_inv=True, aniso_formula=True, reduction=reduction):
+                    if t1 and s.dimension_estimate_for_anisotropic(kk, usedyn and dynamic) <= bound:
+                        if ss.is_simple(kk, no_inv=True, aniso_formula=True, reduction=reduction, bound=bound):
                             simple[kk].append(ss)
         else:
             if check:

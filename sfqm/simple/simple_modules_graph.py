@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 #from Bsets import dict_to_genus_symbol_string, genus_symbol_string_to_dict, Bbf
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
+from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, log, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
 from sage.parallel.decorate import *
 from sage.misc.cachefunc import *
 import itertools
@@ -38,8 +38,12 @@ NCPUS0 = 4
 NCPUS1 = 10
 
 @parallel(ncpus=NCPUS1)
-def check_simple(s, k, reduction = False, bound = 0):
-    return s.is_simple(k, reduction=reduction, bound=bound)
+def check_simple(s, k, reduction = False, bound = 0, check_injectivity_criterion=False, p=0, q=0):
+    simple = s.is_simple(k, reduction=reduction, bound=bound)
+    if (not simple) and check_injectivity_criterion:
+        return (not s.is_additive_lift_injective(p,q))
+    else:
+        return simple
 
 def prime_pol(s, p, k):
     A = RR(s.order())
@@ -55,6 +59,11 @@ def prime_pol_simple(p, k):
     p = RR(p)
     k = RR(k)
     return (p**2-1)*(k - 1)/24 - 0.5*p
+
+def aniso_bound(k, bound=0):
+    f = lambda d: RR((d+1)*(k+1))/24-3-0.86*d**(RR(5)/8)*log(2*d)
+    
+    
 
 
 class ColorFormatter(logging.Formatter):
@@ -240,7 +249,7 @@ class SimpleModulesGraph(DiGraph):
         ###########################################################
         # Determine which primes need to be checked
         # According to the proof of Proposition XX in [BEF], we
-        # only need to check primesnot dividing the 6*level(s),
+        # only need to check primes not dividing the 6*level(s),
         # for which prime_pol(s,p,k) <= 0.
         # For those primes, we check if there is any
         # k-simple fqm in s.C(p) and if not, we do not have to
@@ -256,7 +265,7 @@ class SimpleModulesGraph(DiGraph):
                         "Smallest prime not dividing 6*level({0}) = {1} is p = {2}".format(s, Integer(6) * s.level(), q))
                     p = q
                     break
-            while prime_pol(s, p, k) <= 0 or p in slp:
+            while prime_pol(s, p, k) <= self._bound or p in slp:
                 p = next_prime(p)
             p = uniq(prime_range(p) + slp)
         logger.info("Starting with s = {0} and primes = {1}".format(s, p))
@@ -341,7 +350,7 @@ class SimpleModulesGraph(DiGraph):
                     # check if we really need to check p for s1
                     # otherwise none of the fqm's in s1.C(p) are simple
                     # and we will not consider them.
-                    if prime_pol(s1.genus_symbol(), p, k) <= 0:
+                    if prime_pol(s1.genus_symbol(), p, k) <= self._bound:
                         Bs2 = Bs2 + s1.genus_symbol().C(p, False)
                     else:
                         logger.info(
@@ -875,3 +884,22 @@ def get_symbol_string(sym):
 
 def SimpleModulesGraph2n(n, aniso_level_limit, **kwds):
     return SimpleModulesGraph((2 - n) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, **kwds)
+
+def SimpleModulesGraphn2(n, aniso_level_limit, **kwds):
+    return SimpleModulesGraph((n-2) % 8, QQ(2 + n) / QQ(2), aniso_level_limit, 2 + n, r=n, s=2, **kwds)
+
+def ModulesForSingularWeight(n, aniso_level_limit, bound=1, **kwds):
+    G = SimpleModulesGraph2n(n, aniso_level_limit, bound=bound, **kwds)
+    l = G.compute()
+    ll = []
+    for s in l:
+        splits = s.splits_scaled_hyperbolic_plane(2,n)
+        if type(splits) == tuple:
+            splits, N = splits
+        if splits:
+            ll.append((str(s), N, s.dimension_cusp_forms((2+n)/2)))
+    if len(l) == len(ll):
+        print "All symbols are global and split a scaled hyperbolic plane"
+    else:
+        print "{1}/{0} symbols split are global and a scaled hyperbolic plane".format(len(l), len(ll))
+    return ll

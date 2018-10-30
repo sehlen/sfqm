@@ -1895,6 +1895,8 @@ class GenusSymbol(object):
                 else:
                     sgn = '+' if (s[2] == 1) else '-'
                     symstr = symstr + '^' + sgn + str(s[1])
+        if symstr == '':
+            symstr = '1^+1'
         return symstr
 
     def _reduce(self):
