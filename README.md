@@ -20,9 +20,10 @@ The build uses Sage's installed Python, Cython and headers; installing with an
 unrelated system Python is not supported. A C compiler is required. Linux builds
 use OpenMP; other platforms build without that flag and have not been validated.
 
-The modernization branch has been exercised on **Sage 10.7 / Python 3.12**.
-CI additionally targets **Sage 10.10**; consult the PR checks before treating that
-version as supported. The historical `master` implementation targeted Sage 7.2
+The modernization branch passes all 20 regression tests in the official
+**Sage 10.10** container and a local conda-forge **Sage 10.7 / Python 3.12**
+environment. The official Sage 10.7 container still fails with a PARI stack
+error; see [issue #5](https://github.com/sehlen/sfqm/issues/5). The historical `master` implementation targeted Sage 7.2
 and cannot be imported unchanged with Python 3.
 
 The Cython files deliberately retain `language_level=2` to preserve their
