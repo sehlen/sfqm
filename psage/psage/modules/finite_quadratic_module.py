@@ -99,7 +99,7 @@ from sage.structure.sage_object           import SageObject
 from sage.structure.element               import AdditiveGroupElement
 from sage.structure.sequence              import Sequence_generic
 from sage.structure.all                   import Sequence
-from sage.all                             import copy,cached_method,is_even,is_odd,Sequence,prod,uniq,valuation,randrange,is_fundamental_discriminant,xmrange,QuadraticField,xgcd,cartesian_product
+from sage.all                             import copy,cached_method,is_even,is_odd,Sequence,prod,uniq,valuation,randrange,xmrange,QuadraticField,xgcd,cartesian_product
 from sage.structure.category_object import normalize_names
 from sage.graphs.digraph import DiGraph
 from sage.rings.number_field.number_field_element import NumberFieldElement
@@ -4027,7 +4027,7 @@ def FiniteQuadraticModuleRandom(discbound=100,normbound=100,verbose=0):
     
     """
     D = 0
-    while False == is_fundamental_discriminant(D):
+    while False == ZZ(D).is_fundamental_discriminant():
         D = ZZ.random_element( -discbound, discbound)
     K=QuadraticField(D,names='a')
     a = K.gens()[0]

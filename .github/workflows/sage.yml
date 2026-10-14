@@ -23,4 +23,7 @@ jobs:
       - name: Install against Sage's Python and Cython
         run: sage -pip install --no-build-isolation .
       - name: Mathematical and control-flow regressions
-        run: sage -python -m unittest discover -s tests -v
+        # Test the installed wheel, without the source tree shadowing its extensions.
+        run: |
+          cd /tmp
+          sage -python -m unittest discover -s "$GITHUB_WORKSPACE/tests" -v
