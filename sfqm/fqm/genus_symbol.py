@@ -1,3 +1,4 @@
+import sys
 """
 Tools to compute with finite quadratic modules and simple lattices.
 
@@ -24,13 +25,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, cartesian_product, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm, odd_part
+from sage.all import ZZ, Zmod, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, CyclotomicField, is_odd, is_even, is_prime, cartesian_product, prod, log, gcd, sign, valuation, binomial, inverse_mod, lcm, odd_part
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from psage.modform.weilrep_tools.dimension import VectorValuedModularForms
 from sage.misc.decorators import options
 from sage.misc.flatten import flatten
 from sage.misc.latex import LatexExpr
-from sage.modular.dims import dimension_cusp_forms
+from sage.modular.dims import dimension_cusp_forms, dimension_modular_forms
 from copy import copy, deepcopy
 from sage.parallel.decorate import *
 from sage.misc.cachefunc import *
@@ -121,7 +122,7 @@ class GenusSymbol(object):
             (1, 1)]
         """
         if isinstance(s, dict):
-            self._symbol_dict = s
+            self._symbol_dict = deepcopy(s)
             # print "in init: ", s
             if not self._is_valid():
                 raise ValueError
@@ -163,7 +164,7 @@ class GenusSymbol(object):
     def p_rank(self, p):
         if not is_prime(p):
             return Integer(0)
-        if not self._symbol_dict.has_key(p):
+        if p not in self._symbol_dict:
             return Integer(0)
         return sum([s[1] for s in self._symbol_dict[p]])
 
@@ -171,7 +172,7 @@ class GenusSymbol(object):
         if self._symbol_dict == {}:
             return Integer(1)
         else:
-            return Integer(prod([p ** (s[0] * s[1]) for p, l in self._symbol_dict.iteritems() for s in l]))
+            return Integer(prod([p ** (s[0] * s[1]) for p, l in self._symbol_dict.items() for s in l]))
 
     @cached_method
     def _ppowers(self, p=None):
@@ -357,7 +358,7 @@ class GenusSymbol(object):
         if not is_prime(p):
             raise TypeError
         ppowers = copy(self._ppowers(p))
-        if debug > 0: print ppowers
+        if debug > 0: print(ppowers)
         if [] == ppowers:
             return dict()
         orbitdict = {(1,) : 1}
@@ -367,7 +368,7 @@ class GenusSymbol(object):
         def _orbit_length( r, eps, t):
 
             if is_even(r):
-                n = Integer(r/2)
+                n = Integer(r//2)
                 if t.is_integral():
                     return p**(r-1) + eps * kronecker(-1,p)**n * (p**n - p**(n-1)) -1
                 else:
@@ -376,7 +377,7 @@ class GenusSymbol(object):
                 if t.is_integral():
                     return p**(r-1)-1
                 else:
-                    n = Integer((r-1)/2)
+                    n = Integer((r-1)//2)
                     return p**(r-1) + eps * kronecker(-1,p)**n * kronecker(2,p) * kronecker(Integer(p*t),p) * p**n
 
         def _multiplicitieslist():
@@ -419,7 +420,7 @@ class GenusSymbol(object):
                             usedrankslist.append(newusedranks)
 
             multiplicitieslist = []
-            for k in completemultiplicitieslist.keys():
+            for k in list(completemultiplicitieslist.keys()):
                 multiplicitieslist += sorted(completemultiplicitieslist[k])
         
             return multiplicitieslist
@@ -437,14 +438,14 @@ class GenusSymbol(object):
         
         while multiplicitieslist != []:
 
-            if debug > 0: print "multiplicitieslist=", multiplicitieslist
+            if debug > 0: print("multiplicitieslist=", multiplicitieslist)
 
             multiplicities = multiplicitieslist.pop()
             k = len(multiplicities)-1
             pk = p**k
             m = p*pk
 
-            if debug > 0: print "pk={0}, m={1}, k={2}".format(pk, m, k)
+            if debug > 0: print("pk={0}, m={1}, k={2}".format(pk, m, k))
 
             if multiplicities[0] == multiplicities[k]:
 
@@ -452,15 +453,15 @@ class GenusSymbol(object):
                 ranksDv1 = ranks[len(ppowers) - len(ordersDv1):]
                 ordersDv1pk = [Integer(x / pk) for x in ordersDv1 if x > pk]
                 ranksDv1pk = ranksDv1[len(ordersDv1)-len(ordersDv1pk):]
-                if debug > 0: print "ordersDv1 = {0}, ranksDv1={1}".format(ordersDv1, ranksDv1)
-                if debug > 0: print "ordersDv1pk = {0}, ranksDv1pk={1}".format(ordersDv1pk, ranksDv1pk)
+                if debug > 0: print("ordersDv1 = {0}, ranksDv1={1}".format(ordersDv1, ranksDv1))
+                if debug > 0: print("ordersDv1pk = {0}, ranksDv1pk={1}".format(ordersDv1pk, ranksDv1pk))
 
                 if len(ordersDv1pk) != 0 and ordersDv1pk[0] == p:
 
                     constantfactor = prod([min(pk, ordersDv1[j])**ranksDv1[j] for j in range(0, len(ordersDv1))]) / pk
-                    if debug > 0: print "constantfactor=", constantfactor
+                    if debug > 0: print("constantfactor=", constantfactor)
                     constantfactor = Integer(constantfactor)
-                    constantfactor *= prod(map(lambda x: p**x, ranksDv1pk[1:]))
+                    constantfactor *= prod([p**x for x in ranksDv1pk[1:]])
                     rank = ranksDv1pk[0]
                     eps = epsilons[len(ranks)-len(ranksDv1pk)]
                     values = [constantfactor * _orbit_length(rank, eps, tconstant / p)]
@@ -481,7 +482,7 @@ class GenusSymbol(object):
 
                                 tt = tdash + tdashdash
                                 orbitlength = values[kronecker(tdashdash, p)+1]
-                                orbit = tuple([m] + multiplicities + map(lambda x: x - floor(x), [tt * p**j / m for j in range(0, k+1)]))
+                                orbit = tuple([m] + multiplicities + [x - floor(x) for x in [tt * p**j / m for j in range(0, k+1)]])
                                 orbitdict[orbit] = orbitlength
 
             else:
@@ -690,7 +691,7 @@ class GenusSymbol(object):
 
         def values_even2adic(gs):
             l, n, eps, t, o = gs._symbol_dict[2][0]
-            n /= 2
+            n //= 2
             factor = 2**((l-1)*n)
             if n == 1 and eps == 1:
                 return [factor * (l+2)] + [factor * (valuation(j,2)+1) for j in range(1,2**l)]
@@ -744,25 +745,25 @@ class GenusSymbol(object):
             level = 2**(l+1)
             squarerepresentationlist = [0 for j in range(0,level)]
             if is_even(l+1):
-                squarerepresentationlist[0] = squarerepresentationlist[2**(l-1)] = 2**((l+1)/2)
+                squarerepresentationlist[0] = squarerepresentationlist[2**(l-1)] = 2**((l+1)//2)
             else:
-                squarerepresentationlist[0] = squarerepresentationlist[2**l] = 2**(l/2)
+                squarerepresentationlist[0] = squarerepresentationlist[2**l] = 2**(l//2)
             for k in range(0,l-1,2):
-                if debug > 0: print "k:", k
+                if debug > 0: print("k:", k)
                 for a in range(1, 2**(l+1-k),8):
-                    if debug > 0: print "a:", a
-                    squarerepresentationlist[2**k * a] = 2**(k/2 + 2)
-            if debug > 0: print "Test the squarelist:", sum(squarerepresentationlist) == level, squarerepresentationlist, level
+                    if debug > 0: print("a:", a)
+                    squarerepresentationlist[2**k * a] = 2**(k//2 + 2)
+            if debug > 0: print("Test the squarelist:", sum(squarerepresentationlist) == level, squarerepresentationlist, level)
 
-            if debug > 0: print "tvalues", tvalues
+            if debug > 0: print("tvalues", tvalues)
             
             t1inverse = inverse_mod(tvalues[0], level)
-            values = [squarerepresentationlist[(j * t1inverse)%level]/2 for j in range(0,level)]
+            values = [squarerepresentationlist[(j * t1inverse)%level]//2 for j in range(0,level)]
 
             if len(tvalues) > 1: #The following works only for tvalues where the last elements coincide
 
                 t2inverse = inverse_mod(tvalues[1], level)
-                newvalues = [squarerepresentationlist[(j * t2inverse)%level]/2 for j in range(0,level)]
+                newvalues = [squarerepresentationlist[(j * t2inverse)%level]//2 for j in range(0,level)]
 
                 for j in range(1,len(tvalues)):
                     values = combine_lists(values, newvalues)
@@ -787,20 +788,20 @@ class GenusSymbol(object):
                     values = combine_lists(values, values_odd2adic(gs))
                 else:
                     values = combine_lists(values, values_even2adic(gs))
-                if debug > 0: print values
+                if debug > 0: print(values)
 
         _P.sort( reverse = True)
 
         while [] != _P:
 
             p = _P.pop()
-            if debug > 0: print "p = ", p
+            if debug > 0: print("p = ", p)
             shortorbitdict = self.orbit_list(p, short = True)
             level = max(self._ppowers(p))
             newvalues = [0 for j in range(0,level)]
             newvalues[0] = 1
             
-            for orbit in shortorbitdict.keys():
+            for orbit in list(shortorbitdict.keys()):
 
                 if orbit != (1,):
                     
@@ -866,11 +867,11 @@ class GenusSymbol(object):
 
         def two_torsion_values_even2adic(gs):
             l, n, eps, t, o = gs._symbol_dict[2][0]
-            n /= 2
+            n //= 2
             fourn = 4**n
             if l == 1:
                 epstwon = eps * 2**n
-                return [(fourn + epstwon)/2, (fourn - epstwon)/2]
+                return [(fourn + epstwon)//2, (fourn - epstwon)//2]
             else:
                 return [fourn]
                 
@@ -880,7 +881,7 @@ class GenusSymbol(object):
                 # if debug > 0: print "n:", n, "eps:", eps, "t:", t, "n-t:", n-t, (n-t)/2
                 if eps == -1:
                     t = (t + 4) % 8
-                n2 = ((n - t)/2) % 4
+                n2 = ((n - t)//2) % 4
                 n1 = n - n2
                 # if debug > 0: print "n1:", n1, "n2:", n2, "t:", t
                 list1 = [sum([binomial(n1,k) for k in range(j,n1+1,4)]) for j in range(0,4)]
@@ -932,12 +933,12 @@ class GenusSymbol(object):
     def sigma(self, s):
         res = Integer(1)
         for p in self.level().prime_factors():
-            res = res * (Integer(1) + sum([p ** (r * s + self._torsion_factors(p ** r)[0][1] / Integer(2))
+            res = res * (Integer(1) + sum([p ** (r * s + sum(e for _, e in self._torsion_factors(p ** r)) / Integer(2))
                                   for r in range(1, self.level().valuation(p) + Integer(1))]))
         return res
 
     def oddity(self):
-        if not self._symbol_dict.has_key(2):
+        if 2 not in self._symbol_dict:
             return 0
         else:
             return (sum([_[4] for _ in self._symbol_dict[2]]) + 4 * len([_ for _ in self._symbol_dict[2] if is_odd(_[0]) and _[2] == -1])) % 8
@@ -960,7 +961,7 @@ class GenusSymbol(object):
                - self.beta_est(use_simple_est) / RR(2)
 
     def beta(self):
-        x = [BB(a) * m for a, m in self.values().iteritems()]
+        x = [BB(a) * m for a, m in self.values().items()]
         return sum(x)
 
     def gaussum(self, s, p=None, F=CC):
@@ -981,7 +982,7 @@ class GenusSymbol(object):
         q = 1
         N = Integer(self.level())
         if debug > 0:
-            print "N={0}".format(N)
+            print("N={0}".format(N))
         for p in N.prime_factors():
             c = self.jordan_components(p)[0]._symbol_dict[p][0]
             if len(c) == 3:
@@ -990,12 +991,12 @@ class GenusSymbol(object):
             elif c[3] == 0 and c[1] == 2:
                 q = q * 2
         if debug > 2:
-            print A, N, q
+            print(A, N, q)
         r1 = lambda d: (-1) ** (len(Integer(gcd(d, q)).prime_factors()))
 
         R2 = self.p_rank(2)
         if debug > 0:
-            print "R2 = {0}".format(R2)
+            print("R2 = {0}".format(R2))
 
         def r2(d):
             if R2 == 0:
@@ -1043,17 +1044,17 @@ class GenusSymbol(object):
             s = len(self.jordan_components(2))
             if s == 2:
                 if debug > 0:
-                    print "s = 2"
+                    print("s = 2")
                 t1 = self.jordan_component(2)._symbol_dict[2][0][4]
                 t2 = self.jordan_component(4)._symbol_dict[2][0][4]
                 t = t2 / t1 % 8
                 if debug > 1:
-                    print "t = {0}".format(t)
+                    print("t = {0}".format(t))
                 if d.valuation(2) == 1 or d.valuation(2) == 2:
                     return 0
                 dd = d / (8 * gcd(d, q))
                 if debug > 1:
-                    print "d = {0}, dd =  {1}".format(d, dd)
+                    print("d = {0}, dd =  {1}".format(d, dd))
                 if dd % 4 == 3:
                     if (t + 1) % 8 in [2, 6]:  # d.valuation(2) == 0:
                         return 0
@@ -1061,11 +1062,11 @@ class GenusSymbol(object):
                 else:
                     if (t + 1) % 4 == 0 and dd.valuation(2) == 0:
                         if debug > 1:
-                            print "returning 0 for t = {0} and d = {1}".format(t, d)
+                            print("returning 0 for t = {0} and d = {1}".format(t, d))
                         return 0
                     a = kronecker(-8, N / d) * kronecker(2, t)
                     if debug > 1:
-                        print "a = {0}".format(a)
+                        print("a = {0}".format(a))
             else:
                 if dd % 4 == 3:
                     a = delta * \
@@ -1075,7 +1076,7 @@ class GenusSymbol(object):
                     a = kronecker(-N2 / gcd(N2, N / d),
                                   (N / d) / gcd(N2, N / d) * t)
             if debug > 1:
-                print "d = {0}, eps2(d) = {1}, delta = {2}".format(d, a, delta)
+                print("d = {0}, eps2(d) = {1}, delta = {2}".format(d, a, delta))
             return a
 
         eps = lambda d: eps2(d) * eps_odd(d) * r1(d) * r2(d) * r3(d)
@@ -1083,7 +1084,7 @@ class GenusSymbol(object):
         if debug > 0:
             for d in N.divisors():
                 if d * gcd(d, q) % 4 in [0, 3]:
-                    print "d = {0}, r1(d) = {1}, r2(d) = {2}, r3(d) = {3}, eps_odd(d) = {4}, eps2(d) = {5}, H(-d(q,d)) = {6}".format(d, r1(d), r2(d), r3(d), eps_odd(d), eps2(d), h(d*gcd(d,q), prec))
+                    print("d = {0}, r1(d) = {1}, r2(d) = {2}, r3(d) = {3}, eps_odd(d) = {4}, eps2(d) = {5}, H(-d(q,d)) = {6}".format(d, r1(d), r2(d), r3(d), eps_odd(d), eps2(d), h(d*gcd(d,q), prec)))
         return -sum(q / gcd(d, q) * eps(d) * h(d * gcd(d, q), prec) for d in N.divisors() if d * gcd(d, q) % 4 in [0, 3])
 
     def beta_est(self, simple_est=False, debug=0):
@@ -1093,7 +1094,7 @@ class GenusSymbol(object):
         q = Integer(1)
         N = self.level()
         if debug > 0:
-            print "N={0}".format(N)
+            print("N={0}".format(N))
         for p in N.prime_factors():
             c = self._symbol_dict[p]
             if len(c) == 1:
@@ -1105,7 +1106,7 @@ class GenusSymbol(object):
 
         R2 = self.p_rank(2)
         if debug > 0:
-            print "R2 = {0}".format(R2)
+            print("R2 = {0}".format(R2))
 
         def r2(d):
             if R2 == 0:
@@ -1116,7 +1117,7 @@ class GenusSymbol(object):
                 return 2 ** (floor(R2 / 2) - 1)
         if simple_est:
             if debug > 0:
-                print "simple estimate for {}".format(self)
+                print("simple estimate for {}".format(self))
             hh = lambda d: log(d) * sqrt(d) / RF.pi()
         else:
             hh = h
@@ -1132,7 +1133,7 @@ class GenusSymbol(object):
                 for r in range(0, c.level().valuation(p) + 1):
                     g = c.char_invariant(p ** r)
                     # print g
-                    resp = resp + abs(imag_part(CC(g[0])) / RR(p ** r))
+                    resp = resp + abs(CC(g[0]).imag() / RR(p ** r))
             res = res * resp
         return res * RR(sqrt(self.order()))
 
@@ -1177,7 +1178,7 @@ class GenusSymbol(object):
                             # print v1,v2
                             val = Integer((v1 + v2) * q % q) / q
                             mult = vc[v1] * vc2[v2]
-                            if not vcnew.has_key(val):
+                            if val not in vcnew:
                                 vcnew[val] = mult
                             else:
                                 vcnew[val] += mult
@@ -1196,7 +1197,7 @@ class GenusSymbol(object):
                 mult *= binomial(R, a)
                 R -= a
             # print val, mult
-            if not vcnew.has_key(val):
+            if val not in vcnew:
                 vcnew[val] = mult
             else:
                 vcnew[val] += mult
@@ -1211,7 +1212,7 @@ class GenusSymbol(object):
                 levels.append(c.level())
         vc = flatten([self._component_values(p) for p in ps], max_level=1)
         # print "vc = ", vc
-        only_vals = map(lambda x: x.keys(), vc)
+        only_vals = [list(x.keys()) for x in vc]
         vals = itertools.product(*only_vals)
         # print list(vals)
         vccomb = {}
@@ -1221,7 +1222,7 @@ class GenusSymbol(object):
             val = sum(v[i] for i in range(len(levels)))
             val = (val * N % N) / N
             mult = prod(vc[i][v[i]] for i in range(len(v)))
-            if not vccomb.has_key(val):
+            if val not in vccomb:
                 vccomb[val] = mult
             else:
                 vccomb[val] += mult
@@ -1238,12 +1239,12 @@ class GenusSymbol(object):
             k = Integer(n - 1) / 2
             kk = k + 1
         if p != 2:
-            Q1 = [(x * x) % p for x in range(1, p / 2 + 1)]
-            Q = [Integer(x) for x in xrange(q) if x % p in Q1]
+            Q1 = [(x * x) % p for x in range(1, p // 2 + 1)]
+            Q = [Integer(x) for x in range(q) if x % p in Q1]
         else:
             Q1 = [1, 7]
-            Q = [Integer(x) for x in xrange(q) if x % 8 in Q1]
-        Q = Q + uniq([(m * p ** (2 * r)) % q for r in range(1, kk) for m in Q])
+            Q = [Integer(x) for x in range(q) if x % 8 in Q1]
+        Q = Q + list(uniq([(m * p ** (2 * r)) % q for r in range(1, kk) for m in Q]))
         Q.append(0)
         # print "Q=", Q
         # print Q1, Q
@@ -1259,7 +1260,7 @@ class GenusSymbol(object):
                     r = nom.valuation(p)
                     mult = 2 * p ** (r / 2)
             # print val
-            if not vc.has_key(val):
+            if val not in vc:
                 vc[val] = mult
             else:
                 vc[val] += mult
@@ -1280,7 +1281,7 @@ class GenusSymbol(object):
         """
         # manual caching
         s = s % self.level()
-        if self.__sigma.has_key((s, p)):
+        if (s, p) in self.__sigma:
             return self.__sigma[(s, p)]
 
         #t = cputime()
@@ -1304,16 +1305,16 @@ class GenusSymbol(object):
             n = c.valuation(p)
             r = c.p_rank(p)
             d = c._eps(p, n)
-            if debug > 0: print "p={0}, n={1}, r={2}, d={3}".format(p,n,r,d)
+            if debug > 0: print("p={0}, n={1}, r={2}, d={3}".format(p,n,r,d))
             if _p and p != _p:
                 continue
             o = None if p != 2 else (0 if c.is_even() else c._symbol_dict[2][0][4])
-            if debug > 0: print "o=",o
+            if debug > 0: print("o=",o)
             odd = c.is_odd()
             k = valuation(s, p)
             s1 = Integer(s / p ** k)
             h = max(n - k, 0)
-            if debug > 0: print "h={0}".format(h)
+            if debug > 0: print("h={0}".format(h))
             q = p ** h
             if p != 2:
                 lci = z ** ((r * (1 - q)) % 8) * d ** (h % 2) if h > 0 else 1
@@ -1325,11 +1326,11 @@ class GenusSymbol(object):
                 f = z ** o if odd else 1
                 lci = f * d ** (h % 2) if h > 0 else 1
                 lci1 = q ** (-r) if h > 0 else 1
-                if debug > 0: print "f={0}, d={1}, lci={2}".format(f, d, lci)
+                if debug > 0: print("f={0}, d={1}, lci={2}".format(f, d, lci))
             if 2 == p:
                 lci = lci ** s1
-            if debug > 0: print "lci=",lci
-            if debug > 0: print "lci1=", lci1
+            if debug > 0: print("lci=",lci)
+            if debug > 0: print("lci1=", lci1)
             ci *= lci * kronecker(s1, 1 / lci1)
             ci1 *= lci1
         v = (ci, QQ(ci1).sqrt())
@@ -1349,7 +1350,7 @@ class GenusSymbol(object):
                     if s.valuation(2) == 1:
                         n = s.p_rank(2) / 2
                         ll = [3 ** (n - 2 * k) * binomial(n, 2 * k)
-                              for k in range(0, n / 2 + 1)]
+                              for k in range(0, n // 2 + 1)]
                         oh = sum(ll)
                         if s.oddity() == 4:
                             svals = {
@@ -1366,11 +1367,11 @@ class GenusSymbol(object):
                 vals = svals
             else:
                 vals_new = dict()
-                for k, m in svals.iteritems():
-                    for kk, mm in vals.iteritems():
+                for k, m in svals.items():
+                    for kk, mm in vals.items():
                         den = lcm(QQ(k).denominator(), QQ(kk).denominator())
                         v = (((k + kk) * den) % den) / Integer(den)
-                        if not vals_new.has_key(v):
+                        if v not in vals_new:
                             vals_new[v] = m * mm
                         else:
                             vals_new[v] += m * mm
@@ -1380,7 +1381,7 @@ class GenusSymbol(object):
     def valuation(self, p):
         r'''Return the p-valuation of the level of self
         '''
-        if not self._symbol_dict.has_key(p):
+        if p not in self._symbol_dict:
             return 0
         if not isinstance(self._symbol_dict[p], list):
             return 0
@@ -1391,7 +1392,7 @@ class GenusSymbol(object):
     @cached_method
     def level(self):
         l = Integer(prod([p ** self.valuation(p)
-                          for p in self._symbol_dict.keys()]))
+                          for p in list(self._symbol_dict.keys())]))
         # print l
         if self.p_rank(2) > 0:
             ll = [_[0] for _ in self._symbol_dict[2] if _[3] == 1]
@@ -1406,7 +1407,7 @@ class GenusSymbol(object):
         sig = 0
         if len(self._symbol_dict) == 0:
             return 0
-        for p, l in self._symbol_dict.iteritems():
+        for p, l in self._symbol_dict.items():
             if p == 2:
                 for s in l:
                     sig = sig + s[4] + \
@@ -1475,7 +1476,7 @@ class GenusSymbol(object):
         nonstr = "The criterion is not satisfied. We cannot decide if the finite quadratic module is unique."
 
         if not (r >= 1 and s >= 1 and r+s >= 3):
-            print nonstr
+            print(nonstr)
             return None
         
         for p in self.level().prime_factors():
@@ -1489,7 +1490,7 @@ class GenusSymbol(object):
                         found = True
                         break
                 if not found:
-                    print nonstr
+                    print(nonstr)
                     return None
             if p == 2 and not satisfied:
                 found = False
@@ -1501,18 +1502,18 @@ class GenusSymbol(object):
                             break
                     if j.p_rank(2) >= 2:
                         try:
-                            j - U(2**(j.valuation(2)))
+                            j - GenusSymbol(str(2**j.valuation(2)) + "^+2")
                             found = True
                             break
                         except ValueError:
                             try:
-                                j - V(2**(j.valuation(2)))
+                                j - GenusSymbol(str(2**j.valuation(2)) + "^-2")
                                 found = True
                                 break
                             except ValueError:
                                 continue
                 if not found:
-                    print nonstr
+                    print(nonstr)
                     return None
         return True
 
@@ -1523,7 +1524,7 @@ class GenusSymbol(object):
         if n is None and not total:
             # if n is given, we assume that p is a prime and n is the valuation
             n = q.valuation(p)
-        if not self._symbol_dict.has_key(p):
+        if p not in self._symbol_dict:
             return 1
         l = self._symbol_dict[p]
         if len(l) == 0:
@@ -1562,8 +1563,7 @@ class GenusSymbol(object):
             #M = FiniteQuadraticModule(s)
             V = VectorValuedModularForms(
                 s, True, aniso_formula=aniso_formula, use_reduction=reduction)
-            d = V.dimension(
-                k, no_inv=no_inv, test_positive=test_positive)
+            d = V.dimension(k)
         else:
             d = dimension_modular_forms(1, k)
         return d
@@ -1622,7 +1622,7 @@ class GenusSymbol(object):
         r'''
         Returns all p-adic Jordan components of self as a list GenusSymbols.
         '''
-        if not self._symbol_dict.has_key(p):
+        if p not in self._symbol_dict:
             return [GenusSymbol()]
         self._reduce()
         return [GenusSymbol({p: [x]}) for x in self._symbol_dict[p]]
@@ -1635,7 +1635,7 @@ class GenusSymbol(object):
             return l
         else:
             l1 = []
-            for p in l.keys():
+            for p in list(l.keys()):
                 l1 += [(p,c) for c in l[p]]
             return l1
 
@@ -1645,7 +1645,7 @@ class GenusSymbol(object):
         else:
             p, n = list(Integer(q).factor())[0]
 
-        if not self._symbol_dict.has_key(p):
+        if p not in self._symbol_dict:
             return GenusSymbol('1^+1')
         else:
             r = []
@@ -1744,15 +1744,15 @@ class GenusSymbol(object):
                         if (N / G).is_isomorphic(M):
                             q = True
                 if not q:
-                    print "Ooops, this one seems to be wrong: ", s
+                    print("Ooops, this one seems to be wrong: ", s)
                 return False
         else:
             BS = self.B(m)
-            print BS
-            print len(BS), len(CS)
+            print(BS)
+            print(len(BS), len(CS))
             if self.level() in [2, 4, 8] and self.p_rank(2) <= 3:
                 if len(BS) > len(CS):
-                    print 'Missing symbols!'
+                    print('Missing symbols!')
                     return False
             for c in CS:
                 found_isomorphic = False
@@ -1761,7 +1761,7 @@ class GenusSymbol(object):
                         found_isomorphic = True
                         break
                 if not found_isomorphic:
-                    print c, " is not isomorphic to any module in s.B(" + str(m) + ")!"
+                    print(c, " is not isomorphic to any module in s.B(" + str(m) + ")!")
                     return False
 
         return True
@@ -1776,7 +1776,7 @@ class GenusSymbol(object):
         d = dict()
         for s in sl:
             L1 = s.split('^')
-            if debug > 0: print L1
+            if debug > 0: print(L1)
             if len(L1) > 2:
                 raise ValueError()
             elif len(L1) == 1:
@@ -1792,20 +1792,20 @@ class GenusSymbol(object):
                 if Integer(L1[1]) in range(8):
                     t = Integer(L1[1])
                 else:
-                    raise ValueError, "Type given, which ist not in 0..7: %s" % (
-                        L1[1])
+                    raise ValueError("Type given, which ist not in 0..7: %s" % (
+                        L1[1]))
             else:
                 t = None
             if not (n != 0 and q != 1 and q.is_prime_power()
                     and (None == t or (is_even(q) and t % 2 == n % 2))
                     and (not (None == t and is_even(q)) or 0 == n % 2)
                     ):
-                raise ValueError, "{0} is not a valid signature!".format(s)
+                raise ValueError("{0} is not a valid signature!".format(s))
             p = q.prime_factors()[0]
             r = q.factor()[0][1]
             eps = sign(n)
             n = abs(n)
-            if not d.has_key(p):
+            if p not in d:
                 d[p] = list()
 
             c = None
@@ -1826,7 +1826,7 @@ class GenusSymbol(object):
           Determines if the _symbol_dict dictionary actually defines
           a finite quadratic module.
         """
-        for p, l in self._symbol_dict.iteritems():
+        for p, l in self._symbol_dict.items():
             if not is_prime(p):
                 return False
             if p != 2:
@@ -1838,7 +1838,7 @@ class GenusSymbol(object):
                     r, n, eps = s
                     if not eps in [1, -1]:
                         return False
-        if not self._symbol_dict.has_key(2):
+        if 2 not in self._symbol_dict:
             return True
         for r, n, eps, tp, t in self._symbol_dict[2]:
             # print r,n,eps,tp,t
@@ -1878,7 +1878,7 @@ class GenusSymbol(object):
         if self._symbol_dict == {}:
             return '1^+1'
         symstr = ''
-        for p, lsym in sorted(self._symbol_dict.iteritems()):
+        for p, lsym in sorted(self._symbol_dict.items()):
             for s in lsym:
                 if s[0] == 0:
                     continue
@@ -1900,47 +1900,26 @@ class GenusSymbol(object):
         return symstr
 
     def _reduce(self):
-        sym = self._symbol_dict
-        for p, sl in sym.iteritems():
-            for s in sl:
-                if s[1] == 0:
-                    sl.remove(s)
-                if s[0] == 0:
-                    sl.remove(s)
-            if p != 2:
-                sl.sort()
-                for s in sl:
-                    # print s
-                    ssl = copy(sl)
-                    for j in range(sl.index(s) + 1, len(ssl)):
-                        t = ssl[j]
-                        if s[0] == t[0]:
-                            s[1] = s[1] + t[1]
-                            s[2] = s[2] * t[2]
-                            sl.remove(t)
-            else:
-                sl.sort()
-                for s in sl:
-                    # print s
-                    ssl = copy(sl)
-                    for j in range(sl.index(s) + 1, len(ssl)):
-                        t = ssl[j]
-                        if s[0] == t[0]:
-                            # print s, t
-                            if s[3] == None:
-                                s[3] = 0
-                            if t[3] == None:
-                                t[3] = 0
-                            s[1] = s[1] + t[1]
-                            s[2] = s[2] * t[2]
-                            if s[3] != t[3]:
-                                s[3] = 1
-                                s[4] = t[4] if t[3] == 1 else s[4]
-                            else:
-                                s[4] = (s[4] + t[4]) % 8
-                            # print s
-                            sl.remove(t)
-                # print sym
+        # Never remove entries from the list currently being traversed.
+        reduced = {}
+        for p, entries in self._symbol_dict.items():
+            by_exponent = {}
+            for entry in entries:
+                if entry[0] == 0 or entry[1] == 0:
+                    continue
+                r = entry[0]
+                if r not in by_exponent:
+                    by_exponent[r] = list(entry)
+                else:
+                    target = by_exponent[r]
+                    target[1] += entry[1]
+                    target[2] *= entry[2]
+                    if p == 2:
+                        target[3] = int(bool(target[3] or entry[3]))
+                        target[4] = (target[4] + entry[4]) % 8
+            if by_exponent:
+                reduced[p] = [by_exponent[r] for r in sorted(by_exponent)]
+        self._symbol_dict = reduced
 
     def __repr__(self):
         return "Genus symbol " + self._to_string()
@@ -1959,8 +1938,8 @@ class GenusSymbol(object):
             return deepcopy(self)
         d = deepcopy(self._symbol_dict)
         e = other._symbol_dict
-        for p, l in e.iteritems():
-            if not d.has_key(p):
+        for p, l in e.items():
+            if p not in d:
                 d[p] = deepcopy(e[p])
             else:
                 d[p] = deepcopy(d[p] + e[p])
@@ -1992,14 +1971,14 @@ class GenusSymbol(object):
         d = s._symbol_dict
         e = other._symbol_dict
         # print d, e
-        for p, l in e.iteritems():
-            if not d.has_key(p):
+        for p, l in e.items():
+            if p not in d:
                 raise err
             else:
                 for c in e[p]:
                     # print c
                     try:
-                        j = s.jordan_component(p ** c[0])._symbol_dict[p]
+                        j = [entry for entry in d[p] if entry[0] == c[0]]
                         # print j
                     except:
                         raise err
@@ -2013,7 +1992,7 @@ class GenusSymbol(object):
                         if j[1] == c[1] and not j[2] == c[2]:
                             # same multiplicity, different eps
                             if debug > 0:
-                                print 'same multiplicity, different eps'
+                                print('same multiplicity, different eps')
                             if not (p == 2 and j[0] == 1 and j[4] == (c[4] + 4) % 8 and j[3] == c[3]):
                                 raise err
                         if p == 2:
@@ -2025,12 +2004,12 @@ class GenusSymbol(object):
                                 if not j[4] == c[4]:
                                     # different oddity
                                     if debug > 0:
-                                        print 'same multiplicity, different oddity'
+                                        print('same multiplicity, different oddity')
                                     if not (j[0] == 1 and j[4] == (c[4] + 4) % 8 and j[2] != c[2] and j[3] == c[3]):
                                         # q=2, oddity differs by 4 and sign has
                                         # changed is ok.
                                         if debug > 0:
-                                            print j[0], (j[4] == (c[4] + 4) % 8), (j[2] != c[2], j[2], c[2]), (j[3] == c[3])
+                                            print(j[0], (j[4] == (c[4] + 4) % 8), (j[2] != c[2], j[2], c[2]), (j[3] == c[3]))
                                         raise err
                             # print j[4], c[4], j,c
                             j[4] = (j[4] - c[4]) % 8
@@ -2055,60 +2034,24 @@ class GenusSymbol(object):
         else:
             return False
 
+    def _sort_key(self):
+        return (self.level(), self.order(), str(self))
+
     def __le__(self, o):
-        r"""
-          Compare two genus symbols for ordering.
-        """
-        if self.level() > o.level():
-            return False
-        if self.order() > o.order():
-            return False
-        l = self._symbol_dict
-        m = o._symbol_dict
-        for p in sorted(l.keys()):
-            if p in m.keys():
-                for i in range(min(len(m[p]), len(l[p]))):
-                    if l[p][i][0] > m[p][i][0]:
-                        return False
-                    if l[p][i][0] == m[p][i][0]:
-                        if l[p][i][1] > l[p][i][1]:
-                            return False
-                        elif l[p][i][2] < m[p][i][2]:
-                            return False
-        return True
-        #return str(self) <= str(o)
+        if not isinstance(o, GenusSymbol):
+            return NotImplemented
+        return self._sort_key() <= o._sort_key()
 
     def __lt__(self, o):
-        r"""
-          Compare two genus symbols for ordering.
-        """
-        if self.level() > o.level():
-            return False
-        if self.order() > o.order():
-            return False
-        l = self._symbol_dict
-        m = o._symbol_dict
-        for p in l.keys():
-            if p in m.keys():
-                for i in range(min(len(m[p]), len(l[p]))):
-                    if l[p][i][0] >= m[p][i][0]:
-                        if l[p][i][0] == m[p][i][0]:
-                            if l[p][i][1] > m[p][i][1]:
-                                return False
-                            elif l[p][i][1] == m[p][i][1] and l[p][i][2] < m[p][i][2]:
-                                return False
-                        else:
-                            return False
-                    else:
-                        return True
-        return True
+        if not isinstance(o, GenusSymbol):
+            return NotImplemented
+        return self._sort_key() < o._sort_key()
 
     def __hash__(self):
         r"""
           We use the string representation for hasing.
         """
         # if not hasattr(self,'_hash') or self._hash == None:
-        self._reduce
         #l = map(lambda x: (x[0],tuple(map(lambda y: tuple(y),x[1]))),list(self._symbol_dict.iteritems()))
         #self._hash = hash(tuple(l))
         # return hash(tuple(l))
@@ -2140,20 +2083,23 @@ def C(genus_symbol, m, use_isomorphisms=True):
     m = Integer(m)
     
     Cs = list()
+    if m < 1:
+        raise ValueError("m must be a positive integer")
+    if m == 1:
+        return [deepcopy(genus_symbol)]
     if not is_prime(m):
-        p = m.prime_factors([0])
-        rec = True
-    else:
-        rec = False
-        p = m
+        symbols = [genus_symbol]
+        for p, exponent in m.factor():
+            for _ in range(exponent):
+                symbols = list(set(t for s in symbols
+                                   for t in C(s, p, use_isomorphisms)))
+        return sorted(symbols)
+    p = m
 
     # print "in C", genus_symbol
     Cs = Cs + trivial_rule(genus_symbol, p)
     if genus_symbol.p_rank(p) == 0:
-        if not rec:
-            return Cs
-        else:
-            sum(C(s,n) for s in Cs)
+        return Cs
 
     # print Cs
     if p == 2:
@@ -2170,10 +2116,7 @@ def C(genus_symbol, m, use_isomorphisms=True):
                         Cs = Cs + C((genus_symbol - j2) + t,2,use_isomorphisms=False)
     else:
         Cs = Cs + odd_power_up_rules(genus_symbol, p)
-    if not rec:
-        return Cs
-    else:
-        return sum(C(s,n) for s in Cs)
+    return Cs
 
 
 def two_level_4_rules(genus_symbol):
@@ -2302,7 +2245,7 @@ def odd_power_up_rules(genus_symbol, p):
             sym_new = genus_symbol - GenusSymbol({p: [[s.valuation(p), 1, 1]]})
             sym_new1 = sym_new + GenusSymbol({p: [[s.valuation(p) + 2, 1, 1]]})
             Bs.append(sym_new1)
-        except:
+        except ValueError:
             pass
         try:
             sym_new = genus_symbol - \
@@ -2310,22 +2253,7 @@ def odd_power_up_rules(genus_symbol, p):
             sym_new1 = sym_new + \
                 GenusSymbol({p: [[s.valuation(p) + 2, 1, -1]]})
             Bs.append(sym_new1)
-        except:
-            pass
-        try:
-            sym_new = genus_symbol - GenusSymbol({p: [[s.valuation(p), 2, 1]]})
-            sym_new1 = sym_new + \
-                GenusSymbol({p: [[s.valuation(p) + 1, 2, ep]]})
-            Bs.append(sym_new1)
-        except:
-            pass
-        try:
-            sym_new = genus_symbol - \
-                GenusSymbol({p: [[s.valuation(p), 2, -1]]})
-            sym_new1 = sym_new + \
-                GenusSymbol({p: [[s.valuation(p) + 1, 2, -ep]]})
-            Bs.append(sym_new1)
-        except:
+        except ValueError:
             pass
     return Bs
 
@@ -2404,7 +2332,7 @@ def prime_anisotropic_symbols(p, fake=False):
                     l = ['4_1^+1', '4_3^-1', '4_5^-1', '4_7^+1', '2_1^+1.4_1^+1',
                          '2_1^+1.4_3^-1', '2_1^+1.4_5^-1', '2_1^+1.4_7^+1']
         # print l
-        return map(lambda x: GenusSymbol(x), l)
+        return [GenusSymbol(x) for x in l]
 
 
 @cached_function
@@ -2415,6 +2343,10 @@ def anisotropic_symbols(N, sig=None, fake=False):
       of finite abelian groups.
     """
     N = Integer(N)
+    if N < 1:
+        raise ValueError("level must be positive")
+    if sig is not None:
+        sig = Integer(sig) % 8
     if sig != None and fake == True:
         raise ValueError(
             "You provided a signature and requested fake symbols. This does not make any sense.")
@@ -2428,13 +2360,13 @@ def anisotropic_symbols(N, sig=None, fake=False):
         syms = prime_anisotropic_symbols(N, fake=fake)
     else:
         p = max(N.prime_factors())
-        M = N / p
         q = p ** N.valuation(p)
-        syms = anisotropic_symbols(M)
-        syms = syms = map(lambda r: r[
-                          0] + r[1], itertools.product(syms, prime_anisotropic_symbols(q, fake=fake)))
+        M = N // q
+        syms = anisotropic_symbols(M, fake=fake)
+        syms = [r[
+                          0] + r[1] for r in itertools.product(syms, prime_anisotropic_symbols(q, fake=fake))]
     if not sig == None:
-        syms = filter(lambda s: s.signature() == sig, syms)
+        syms = [s for s in syms if s.signature() == sig]
     have = []
     syms_new = []
     return syms

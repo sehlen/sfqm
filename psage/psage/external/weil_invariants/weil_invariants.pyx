@@ -63,9 +63,8 @@ from sage.all import copy, exp, Integer, pi, I, walltime, CyclotomicField, ZZ, Q
     kronecker, vector, CC, GF, next_prime, lcm, sqrt, cached_function, MatrixSpace#, sage_malloc, sage_free, ZZ
 from sage.rings.number_field.number_field import NumberField_cyclotomic
 from cython.parallel import prange
-from sage.matrix.matrix_modn_dense_double cimport Matrix_modn_dense_double
-from sage.matrix.matrix_modn_dense_float cimport Matrix_modn_dense_float
 import numpy as np
+from operator import itemgetter
 
 
 cdef long _el_index(long * c, long *ed, int r) nogil:
@@ -117,14 +116,17 @@ cdef long _neg_index(long ii, long *ed, int r) nogil:
     cdef long* eltl = _elt(ii, ed, r)
     for jj in xrange(0,r):
         eltl[jj]=-eltl[jj]
-    return _el_index(eltl, ed, r)
+    cdef long result = _el_index(eltl, ed, r)
+    sig_free(eltl)
+    return result
 
 cpdef norm_cmp(x, y):
     if x[1] < y[1]:
         return int(-1)
-    else:
+    elif x[1] > y[1]:
         return int(1)
-    
+    return int(0)
+
 cdef long B(long i, long j, long **JJ, long *ed, int r) nogil:
     r"""
     Returns the bilinear form of the elements with canonical index `i` and `j`
@@ -139,6 +141,8 @@ cdef long B(long i, long j, long **JJ, long *ed, int r) nogil:
         for jj in xrange(r):
             res = res + ll[ii]*kk[jj]*JJ[ii][jj]
     #sig_off()
+    sig_free(ll)
+    sig_free(kk)
     return res
 
 cdef long* Bl(long i, long **JJ, long *ed, int r) nogil:
@@ -150,6 +154,7 @@ cdef long* Bl(long i, long **JJ, long *ed, int r) nogil:
         kk[ii] = 0
         for jj in xrange(r):
             kk[ii] = kk[ii] + ll[jj]*JJ[jj][ii]
+    sig_free(ll)
     return kk
 
 cdef long BBl(long j, long *Bi, long *ed, int r) nogil:
@@ -157,6 +162,7 @@ cdef long BBl(long j, long *Bi, long *ed, int r) nogil:
     cdef long* ll = _elt(j, ed, r)
     for ii in xrange(r):
         res = res + Bi[ii]*ll[ii]
+    sig_free(ll)
     return res
 
 cpdef cython_invariants_dim(FQM, use_reduction = True, proof = False, debug=0):
@@ -164,6 +170,8 @@ cpdef cython_invariants_dim(FQM, use_reduction = True, proof = False, debug=0):
         print "Computing invariants dimension of {}".format(FQM)
     if FQM.signature() % 2 != 0:
         return 0
+    if FQM.level() == 1:
+        return 1
     dim = 0
     if not is_prime_power(FQM.level()):
         for p,n in FQM.level().factor():
@@ -187,6 +195,7 @@ cpdef cython_invariants_dim(FQM, use_reduction = True, proof = False, debug=0):
     return dim
 
 cpdef cython_invariants_matrices(FQM, K = QQbar, proof = False, debug=0, return_H = False):
+    cdef long p = 0
     cdef long i, j = 0
     cdef int l = long(FQM.level())
     cdef long n = long(FQM.order())
@@ -200,10 +209,12 @@ cpdef cython_invariants_matrices(FQM, K = QQbar, proof = False, debug=0, return_
         return span( [], K)
 
     if debug > 0: t = walltime()
-    cdef long[:] table = np.ndarray(l, dtype=long)
+    cdef long[:] table = np.ndarray(l, dtype=np.dtype("l"))
     cdef list table0 = list()
 
     cdef long q = K.characteristic()
+    if proof and q > 0:
+        raise NotImplementedError("Use cython_invariants(..., proof=True) for exact verification")
     if q > 0:
         if debug > 0: print 'positive characteristic: ', q
         if 1 != q % l:
@@ -365,10 +376,10 @@ cpdef cython_invariants_matrices(FQM, K = QQbar, proof = False, debug=0, return_
     if debug > 0: print 'ni = %d'%(ni)
     n = len(Ml)
 
-    Ml.sort(norm_cmp)
+    Ml.sort(key=itemgetter(1))
     cdef long *Mli = NULL
     Mli = <long*> sig_malloc(sizeof(long)*n)
-    cdef long[:] Mlf = np.ndarray(n, dtype=int)
+    cdef long[:] Mlf = np.ndarray(n, dtype=np.dtype("l"))
     for ii, xx in enumerate(Ml):
         Mli[ii] = xx[0]
         Mlf[ii] = xx[2]
@@ -398,7 +409,10 @@ cpdef cython_invariants_matrices(FQM, K = QQbar, proof = False, debug=0, return_
         for j in xrange(n-i):
             #BB[i][j] = B(Ml[i+j][0],Ml[i][0],JJ,ed,r) % l
             BB[i][j] = (l-BBl(Mli[i+j],Bli,ed,r)) % l
+        sig_free(Bli)
 
+    sig_free(ed)
+    sig_free(Mli)
     if not JJ is NULL:
         for i in range(r):
             if not JJ[i] is NULL:
@@ -410,10 +424,9 @@ cpdef cython_invariants_matrices(FQM, K = QQbar, proof = False, debug=0, return_
         t = walltime()
 
     if debug > 0: t = walltime()
-    #A = np.ndarray((n,ni), dtype=long)
+    #A = np.ndarray((n,ni), dtype=np.dtype("l"))
     #cdef long[:,:] HH = A
     cdef H = Matrix(K,n,ni)
-    cdef long p = 0
     cdef tp = 0
     for j in xrange(ni):
         #print j, f
@@ -437,7 +450,11 @@ cpdef cython_invariants_matrices(FQM, K = QQbar, proof = False, debug=0, return_
     #H = H.change_ring(K)
     #if debug > 0: print '%f: conversion to H'%(walltime(t)); t = walltime(t)
     
-    if return_H: return Ml, ni, H
+    if return_H:
+        for i in range(ni):
+            sig_free(BB[i])
+        sig_free(BB)
+        return Ml, ni, H
 
     U = H.matrix_from_rows(range(ni,n))
     V = H.matrix_from_rows(range(ni))
@@ -480,6 +497,10 @@ cpdef reconstruction(x):
         return 1/QQ((~x).lift_centered())
 
 cpdef cython_invariants(FQM, use_reduction = True, proof = False, checks = False, debug=0, K = None):
+    if proof or checks:
+        return cython_invariants(FQM, use_reduction=False, proof=False,
+                                 checks=False, debug=debug,
+                                 K=CyclotomicField(lcm(8, FQM.level())))
     if use_reduction and K == None:
         found = False
         p = FQM.level()
@@ -573,7 +594,8 @@ cpdef invariants(FQM, use_reduction = True, proof = False, checks=False, debug =
         vv = _elt(v[0],ed,r)
         vvl = [vv[i] for i in range(r)]
         Mll.append(FQM(vvl))
-        
+        sig_free(vv)
+    sig_free(ed)
     return Mll, Sp
             
             

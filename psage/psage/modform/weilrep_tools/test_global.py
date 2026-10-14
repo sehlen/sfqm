@@ -26,7 +26,7 @@ def is_global(M,r,s,return_symbol=False):
     sig=r-s
     for A in J:
         p=A[1][0]
-        if not symbols.has_key(p):
+        if p not in symbols:
             symbols[p]=list()
         sym=list(A[1][1:len(A[1])])
         if p==2:
@@ -51,7 +51,7 @@ def is_global(M,r,s,return_symbol=False):
         #print p, sym
         symbols[p].append(sym)
     D=M.order()*(-1)**s
-    for p in symbols.keys():
+    for p in list(symbols.keys()):
         prank = sum([sym[1] for sym in symbols[p]])
         v = sum([ sym[0]*sym[1] for sym in symbols[p] ])
         Dp=D//(p**v)
@@ -69,7 +69,7 @@ def is_global(M,r,s,return_symbol=False):
                             break
                 symbols[p].append([0,n - prank, eps])
     symbol=GenusSymbol_global_ring(MatrixSpace(ZZ,r+s,r+s).one())
-    symbol._local_symbols=[Genus_Symbol_p_adic_ring(p,syms) for p,syms in symbols.iteritems()]
+    symbol._local_symbols=[Genus_Symbol_p_adic_ring(p,syms) for p,syms in symbols.items()]
     symbol._signature=(r,s)
     #print r,s, symbol._local_symbols
     isglob=is_GlobalGenus(symbol)
@@ -106,7 +106,7 @@ list_freitag = {
 
 def test_list_freitag(m=-1):
     all=True if m==-1 else False
-    for n,symbols in list_freitag.iteritems():
+    for n,symbols in list_freitag.items():
         if all or n==m:
             for symbol in symbols:
                 M=FiniteQuadraticModule(symbol)
@@ -117,7 +117,7 @@ def test_list_freitag(m=-1):
                     d=V.dimension_cusp_forms(k)
                 else:
                     d="?"
-                print "n = ", n, " ", symbol, ': Dimension('+ str(k) + ') = ', d, ", ", glob, '|M|=', M.order()
+                print("n = ", n, " ", symbol, ': Dimension('+ str(k) + ') = ', d, ", ", glob, '|M|=', M.order())
 
 def search_global_symbols(n,D):
     rank=2+n
@@ -221,7 +221,7 @@ def search_global_symbols(n,D):
     global_symbols = []
     for sym in symbols:
         #print sym
-        for p in sym.keys():
+        for p in list(sym.keys()):
             prank = sum([s[1] for s in sym[p]])
             v = sum([ s[0]*s[1] for s in sym[p] ])
             Dp=D//(p**v)
@@ -239,7 +239,7 @@ def search_global_symbols(n,D):
                                 break
                     sym[p].insert(0,[0,rank - prank, eps])
         symbol=GenusSymbol_global_ring(MatrixSpace(ZZ,rank,rank).one())
-        symbol._local_symbols=[Genus_Symbol_p_adic_ring(p,syms) for p,syms in sym.iteritems()]
+        symbol._local_symbols=[Genus_Symbol_p_adic_ring(p,syms) for p,syms in sym.items()]
         symbol._signature=(2,n)
         #print symbol._local_symbols
         isglob=is_GlobalGenus(symbol)
@@ -273,14 +273,14 @@ def search_for_simple_lattices(n=3,min_D=2,max_D=100):
         global_symbols=search_global_symbols(n,D)                
         #global_symbols=Set(global_symbols)
         if len(global_symbols)>0:
-            print "Symbols for D =", D, ": ", len(global_symbols)
+            print("Symbols for D =", D, ": ", len(global_symbols))
         for sym in global_symbols:
             symstr=get_symbol_string(sym)
-            print symstr
+            print(symstr)
             sys.stdout.flush()
             if is_simple(symstr):
-                print symstr, "simple!"
-                if not simple_symbols.has_key(D):
+                print(symstr, "simple!")
+                if D not in simple_symbols:
                     simple_symbols[D]=list()
                 simple_symbols[D].append(symstr)
                 #print sym._local_symbols[0].canonical_symbol()
@@ -351,45 +351,45 @@ def compare_spaces(n,min_D,max_D):
         global_symbols=search_global_symbols(n,D)                
         #global_symbols=Set(global_symbols)
         if len(global_symbols)>0:
-            print "Symbols for D =", D, ": ", len(global_symbols)
+            print("Symbols for D =", D, ": ", len(global_symbols))
         for sym in global_symbols:
             symstr=get_symbol_string(sym)
-            print symstr
+            print(symstr)
             sys.stdout.flush()
             M=FiniteQuadraticModule(symstr)
             V=VectorValuedModularForms(M)
             dv,ds,S,B=compare_vv_scalar(V,k)
             if dv==0 and ds!=0 or dv!=0:
-                print "dim S({0},{1},rho*) = {2}, dim S(Gamma0({3}),chi_D,{1})={4}".format(symstr,k,dv,V._level,ds)
+                print("dim S({0},{1},rho*) = {2}, dim S(Gamma0({3}),chi_D,{1})={4}".format(symstr,k,dv,V._level,ds))
                 if ds != 0:
                     W=V._W
                     f,index=find_lifting_candidate(W,B)
                     #spaces[D]={"W": W, "dimW": dv, "S": S, "dimS":ds, "new_lifting_candidate": f and f.is_new()}
                     if f: #and f.is_new:
-                        print "Newform lifting candidate: ", f.qexp(index+3), "\nindex=", index
+                        print("Newform lifting candidate: ", f.qexp(index+3), "\nindex=", index)
                     #elif f:
                     #    print "Oldform lifting candidate found."
                     else:
-                        print "**** No newform lifting candidate"
-                        if not bad_symbols.has_key(V._level):
+                        print("**** No newform lifting candidate")
+                        if V._level not in bad_symbols:
                             bad_symbols[V._level]=list()
                         bad_symbols[V._level].append(symstr)
                     #else:
                     #    print "No lifting candidate, basis:"
                     #    S
                 elif dv==0:
-                    if not bad_symbols.has_key(V._level):
+                    if V._level not in bad_symbols:
                         bad_symbols[V._level]=list()
                     bad_symbols[V._level].append(symstr)
             else:
                 if dv==0 and ds==0:
-                    print "simple and scalar valued space = 0"
+                    print("simple and scalar valued space = 0")
     return bad_symbols
 
 def find_lifting_candidate(W,B,max=2):
     vals=W.finite_quadratic_module().values()
     vals=list(vals)
-    vals=map(lambda x: 1-x,vals) # we consider the dual representation!
+    vals=[1-x for x in vals] # we consider the dual representation!
     vals.sort()
     f_cand=None
     for n in range(max):
@@ -411,7 +411,7 @@ def get_values(M,dual=False):
     vals=M.values()
     vals=list(vals)
     if dual:
-        vals=map(lambda x: 1-x,vals) # we consider the dual representation!
+        vals=[1-x for x in vals] # we consider the dual representation!
     vals.sort()
     return vals
 
@@ -432,7 +432,7 @@ def compare_formulas_1(D,k):
             DD=ZZ(D)/ZZ(d)
             ep=euler_phi((chi*DG(kronecker_character(-d))).conductor())
             #ep=euler_phi(squarefree_part(abs(D*d)))
-            print "ep=", ep, D, d
+            print("ep=", ep, D, d)
             ids=[a for a in K.ideals_of_bdd_norm(-DD)[-DD]]
             eulers1=[]
             for a in ids:
@@ -443,11 +443,11 @@ def compare_formulas_1(D,k):
                 else:
                     e=e/ep
                 eulers1.append(e)
-            print eulers1, ep
+            print(eulers1, ep)
             s=sum(eulers1)
             if ep==1 and not (d.divides(DD) or abs(DD)==1):
                 continue
-            print d, s
+            print(d, s)
             if len(eulers1)>0:
                 d2+=s*K.class_number()
     return d1-d2
@@ -480,8 +480,8 @@ def formtest(minD,maxD,k,eps=-1):
         if (eps*D)%4==1:
             dif,d,dd=compare_formulas_2(eps*D,k)
             if dif<=1e-6:
-                print D, factor(D)
-                print dif,d,dd
+                print(D, factor(D))
+                print(dif,d,dd)
             #ds[D]=(d[1]-d[2])/RR(D)
     #return ds
 
@@ -492,10 +492,10 @@ def formtest_2(minD,maxD):
             for d in divisors(D):
                 if is_fundamental_discriminant(-d):
                     sd=RR(RR(1)/RR(6)*(RR(d)+RR(D)/RR(d))-RR(sqrt(D))/RR(pi)*log(d))
-                    print D, d, sd
+                    print(D, d, sd)
                     s+=sd
         if s<=0:
-            print "s=", s, "D=", D
+            print("s=", s, "D=", D)
 
 
 def CMorbits(D):
@@ -505,8 +505,8 @@ def CMorbits(D):
 def orbittest(minD,maxD,eps=-1):
     for D in range(minD,maxD+1):
         if is_fundamental_discriminant(eps*D) and is_odd(D):
-            print D
-            print CMorbits(eps*D)-len(Newforms(kronecker_character(eps*D),3,names='a'))
+            print(D)
+            print(CMorbits(eps*D)-len(Newforms(kronecker_character(eps*D),3,names='a')))
 
 def sigma_rep(Delta,print_divisors=False):
     s=0
@@ -516,7 +516,7 @@ def sigma_rep(Delta,print_divisors=False):
             for d in divisors(Delta/D):
                 s+=kronecker(D,d)
                 if print_divisors:
-                    print D,d, kronecker(D,d)
+                    print(D,d, kronecker(D,d))
     return s
 
 
@@ -539,11 +539,11 @@ def test_sigma_rep(Dmin=1,Dmax=1000,print_divisors=False):
                 sw[0]=-D
             ct=RR(100)*(RR(D)**(1.0/25))
             #if ct<=RR(sr):
-            print -D, sr, ct, sigma(D,0)
+            print(-D, sr, ct, sigma(D,0))
     sa=sa/n
-    print "Max: ", sm
-    print "Avg: ", sa, RR(sa)
-    print "Worst case: ", sw
+    print("Max: ", sm)
+    print("Avg: ", sa, RR(sa))
+    print("Worst case: ", sw)
 
 def neg_fdd_div(D):
     s=0
@@ -556,7 +556,7 @@ def neg_fdd_div(D):
 def test_neg_fdd_div(minD,maxD):
     for D in range(minD,maxD):
         if is_fundamental_discriminant(-D):
-            print D, neg_fdd_div(D), sigma(D,0)/2
+            print(D, neg_fdd_div(D), sigma(D,0)/2)
 
 def sigma_log(D):
     return sum([RR(log(d)) for d in divisors(D)])

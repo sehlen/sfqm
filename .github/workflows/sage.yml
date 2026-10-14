@@ -1,0 +1,26 @@
+name: SageMath regression tests
+on:
+  pull_request:
+  push:
+    branches: ['review/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sage:
+    runs-on: ubuntu-latest
+    env:
+      OMP_NUM_THREADS: 2
+    strategy:
+      fail-fast: false
+      matrix:
+        sage: ['10.7', '10.10']
+    container:
+      image: sagemath/sagemath:${{ matrix.sage }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install against Sage's Python and Cython
+        run: sage -pip install --no-build-isolation .
+      - name: Mathematical and control-flow regressions
+        run: sage -python -m unittest discover -s tests -v

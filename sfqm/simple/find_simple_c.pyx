@@ -1,13 +1,13 @@
-from simple_modules_graph import SimpleModulesGraph
+from .simple_modules_graph import SimpleModulesGraph
 from ..fqm.genus_symbol import anisotropic_symbols
-from sage.all import Integer, is_squarefree, is_even, is_odd, squarefree_part, walltime, RR
+from sage.all import ZZ, QQ, Integer, is_squarefree, is_even, is_odd, squarefree_part, walltime, RR
 from sage.parallel.decorate import *
 
 #########################################
 # Testing functions
 #########################################
 
-def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=range(2, Integer(27)/2), test_dim=True, dynamic=True, only_2_n=False, reduction=False, bound=0):
+def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, weights=list(range(2, 14)), test_dim=True, dynamic=True, only_2_n=False, reduction=False, bound=0):
     r"""
       ```find_simple_anisotropic``` computes a list of all anisotropic finite quadratic modules
       up to a given maximal order ```max_order``` that are $k$-simple for given weights.
@@ -29,11 +29,11 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
     lower = Integer(lower)
     upper = Integer(upper)
     max_order = Integer(max_order) if max_order is not None else Integer(upper)
-    k = Integer(2*k)/2 if k is not None else None
-    if isinstance(weights, list):
-        weights = map(lambda x: Integer(2*x)/2, weights)
-    elif k is None:
-        raise ValueError("Either k or a list of half-integers for weights has to be provided as input.")
+    k = QQ(k) if k is not None else None
+    weights = list(weights) if k is None else [k]
+    if any(2*x not in ZZ for x in weights):
+        raise ValueError("weights must be integral or half-integral")
+    weights = [QQ(x) for x in weights]
         
     t = walltime()
     if k != None:
@@ -102,13 +102,15 @@ def _find_simple_anisotropic(lower, upper, max_order=None, sig=None, k=None, wei
                 else:
                     syms = anisotropic_symbols(N)
             for ss in syms:
+                if ss.order() > max_order:
+                    continue
                 for kk in weights:
                     # print ss.signature(), kk, ss
                     if only_2_n:
                         t1 = ss.signature() % 8 == (4 - 2*kk) % 8
                     else:
                         t1 = ss.signature() % 4 == (-2*kk) % 4
-                    if t1 and s.dimension_estimate_for_anisotropic(kk, usedyn and dynamic) <= bound:
+                    if t1 and ss.dimension_estimate_for_anisotropic(kk, usedyn and dynamic) <= bound:
                         if ss.is_simple(kk, no_inv=True, aniso_formula=True, reduction=reduction, bound=bound):
                             simple[kk].append(ss)
         else:
