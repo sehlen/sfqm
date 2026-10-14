@@ -1,3 +1,3 @@
-import weilrep_tools
+from . import weilrep_tools
 
-from weilrep_tools.dimension import VectorValuedModularForms
+from .weilrep_tools.dimension import VectorValuedModularForms

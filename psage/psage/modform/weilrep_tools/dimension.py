@@ -69,10 +69,10 @@ class VectorValuedModularForms(SageObject):
     def __init__(self, A, use_genus_symbols = False, aniso_formula = False, use_reduction = False):
         try:
             from sfqm.fqm.genus_symbol import GenusSymbol
-        except ImportError, e:
-            print e
+        except ImportError as e:
+            print(e)
             use_genus_symbols = False
-            print "Not using genus symbols."
+            print("Not using genus symbols.")
         self._use_reduction = use_reduction
         if use_genus_symbols:
             if isinstance(A, str):
@@ -127,7 +127,7 @@ class VectorValuedModularForms(SageObject):
             return 0
         m = self._m
         n2 = self._n2
-        if self._v2.has_key(0):
+        if 0 in self._v2:
             v2 = self._v2[0]
         else:
             v2 = 1
@@ -156,62 +156,64 @@ class VectorValuedModularForms(SageObject):
         RR = RealField(prec)
         CC = ComplexField(prec)
         
-        if debug > 0: print "d, m = {0}, {1}".format(d,m)
+        if debug > 0: print("d, m = {0}, {1}".format(d,m))
         eps = exp( 2 * CC.pi() * CC(0,1) * (s + 2*k) / Integer(4) )
         eps = round(real(eps))        
         if self._alpha3 is None or self._last_eps != eps:
             self._last_eps = eps
             if self._aniso_formula:
                 self._alpha4 = 1 if eps == 1 else 0
-                self._alpha3 = -sum([BB(a)*mm for a,mm in self._v2.iteritems() if a != 0])
+                self._alpha3 = -sum([BB(a)*mm for a,mm in self._v2.items() if a != 0])
                 #print self._alpha3
                 self._alpha3 += Integer(d) - Integer(1) - self._g.beta_formula()
                 #print self._alpha3, self._g.a5prime_formula()
                 self._alpha3 = self._alpha3/RR(2)
             else:
-                self._alpha3 = eps*sum([(1-a)*mm for a,mm in self._v2.iteritems() if a != 0])
-                if debug>0: print "alpha3t = ", self._alpha3
-                self._alpha3 += sum([(1-a)*mm for a,mm in vals.iteritems() if a != 0])
+                self._alpha3 = eps*sum([(1-a)*mm for a,mm in self._v2.items() if a != 0])
+                if debug>0: print("alpha3t = ", self._alpha3)
+                self._alpha3 += sum([(1-a)*mm for a,mm in vals.items() if a != 0])
                 #print self._alpha3
                 self._alpha3 = self._alpha3 / Integer(2)
         alpha3 = self._alpha3
         alpha4 = self._alpha4
-        if debug > 0: print alpha3, alpha4
+        if debug > 0: print(alpha3, alpha4)
         g1=M.char_invariant(1)
         g1=CC(g1[0]*g1[1])
         #print g1
         g2=M.char_invariant(2)
         g2=CC(g2[0]*g2[1])
-        if debug > 0: print g2, g2.parent()
+        if debug > 0: print(g2, g2.parent())
         g3=M.char_invariant(-3)
         g3=CC(g3[0]*g3[1])
-        if debug > 0: print "eps = {0}".format(eps)
-        if debug > 0: print "d/4 = {0}, m/4 = {1}, e^(2pi i (2k+s)/8) = {2}".format(RR(d) / RR(4), sqrt(RR(m)) / RR(4), CC(exp(2 * CC.pi() * CC(0,1) * (2 * k + s) / Integer(8))))
+        if debug > 0: print("eps = {0}".format(eps))
+        if debug > 0: print("d/4 = {0}, m/4 = {1}, e^(2pi i (2k+s)/8) = {2}".format(RR(d) / RR(4), sqrt(RR(m)) / RR(4), CC(exp(2 * CC.pi() * CC(0,1) * (2 * k + s) / Integer(8)))))
         if eps == 1:
             g2_2 = real(g2)
         else:
             g2_2 = imag(g2)*CC(0,1)
         alpha1 = RR(d) / RR(4) - sqrt(RR(m)) / RR(4)  * CC(exp(2 * CC.pi() * CC(0,1) * (2 * k + s) / Integer(8)) * g2_2)
-        if debug > 0: print alpha1
+        if debug > 0: print(alpha1)
         alpha2 = RR(d) / RR(3) + sqrt(RR(m)) / (3 * sqrt(RR(3))) * real(exp(CC(2 * CC.pi() * CC(0,1) * (4 * k + 3 * s - 10) / 24)) * (g1 + eps*g3))
-        if debug > 0: print "alpha1 = {0}, alpha2 = {1}, alpha3 = {2}, g1 = {3}, g2 = {4}, g3 = {5}, d = {6}, k = {7}, s = {8}".format(alpha1, alpha2, alpha3, g1, g2, g3, d, k, s)
+        if debug > 0: print("alpha1 = {0}, alpha2 = {1}, alpha3 = {2}, g1 = {3}, g2 = {4}, g3 = {5}, d = {6}, k = {7}, s = {8}".format(alpha1, alpha2, alpha3, g1, g2, g3, d, k, s))
         dim = real(d + (d * k / Integer(12)) - alpha1 - alpha2 - alpha3)
         if debug > 0:
-            print "dimension:", dim
+            print("dimension:", dim)
         if abs(dim-round(dim)) > 1e-6:
             raise RuntimeError("Error ({0}) too large in dimension formula for {1} and k={2}".format(abs(dim-round(dim)), self._M if self._M is not None else self._g, k))
         dimr = dim
         dim = Integer(round(dim))
-        if k >=2 and dim < 0:
+        if k >= 2 and dim < 0:
             raise RuntimeError("Negative dimension (= {0}, {1})!".format(dim, dimr))
         return dim
 
     def dimension_cusp_forms(self, k, ignore=False, no_inv = False, test_positive = False, proof = False, debug=0):
+        if 2*k not in ZZ:
+            raise ValueError("k has to be integral or half-integral")
         if debug>0:
             if self._g is not None:
-                print "Computing dimension for {}".format(self._g)
+                print("Computing dimension for {}".format(self._g))
             else:
-                print "Computing dimension for {}".format(self._M)
+                print("Computing dimension for {}".format(self._M))
         if (2*k+self._signature)%2 != 0:
             return 0
         if k == Integer(3)/2:
@@ -220,7 +222,7 @@ class VectorValuedModularForms(SageObject):
                 if self._M == None:
                     self._M = self._g.finite_quadratic_module()
                 corr = weight_one_half_dim(self._M, self._use_reduction, proof = proof)
-                if debug > 0: print "weight one half: {0}".format(corr)
+                if debug > 0: print("weight one half: {0}".format(corr))
                 dim += corr
         else:
             dim = self.dimension(k, ignore, debug=debug) - self._alpha4
@@ -231,7 +233,7 @@ class VectorValuedModularForms(SageObject):
                 self._M = self._g.finite_quadratic_module()
             if self._M.level() == 1:
                 return dim + 1
-            dinv = cython_invariants_dim(self._M,self._use_reduction)
+            dinv = cython_invariants_dim(self._M,self._use_reduction,proof=proof)
             dim = dim + dinv
         if dim < 0:
             raise RuntimeError("Negative dimension (= {0}, alpha4 = {1})!".format(dim, self._alpha4))
@@ -240,7 +242,7 @@ class VectorValuedModularForms(SageObject):
 def test_real_quadratic(minp=1,maxp=100,minwt=2,maxwt=1000):
     for p in prime_range(minp,maxp):
         if p%4==1:
-            print "p = ", p
+            print("p = ", p)
             gram=Matrix(ZZ,2,2,[2,1,1,(1-p)/2])
             M=VectorValuedModularForms(gram)
             if is_odd(minwt):
@@ -248,7 +250,7 @@ def test_real_quadratic(minp=1,maxp=100,minwt=2,maxwt=1000):
             for kk in range(minwt,round(maxwt/2-minwt)):
                 k = minwt+2*kk
                 if M.dimension_cusp_forms(k)-dimension_cusp_forms(kronecker_character(p),k)/2 != 0:
-                    print "ERROR: ", k, M.dimension_cusp_forms(k), dimension_cusp_forms(kronecker_character(p),k)/2
+                    print("ERROR: ", k, M.dimension_cusp_forms(k), dimension_cusp_forms(kronecker_character(p),k)/2)
                     return False
     return true
 
@@ -263,7 +265,7 @@ def test_jacobi(index=1,minwt=4,maxwt=100,eps=-1):
         minwt=minwt+1
     for kk in range(0,round(maxwt/2-minwt)+2):
         k = minwt+2*kk+(1+eps)/2
-        print "Testing k = ", k
+        print("Testing k = ", k)
         if eps==-1:
             dimJ=dimension_jac_forms(k,m,-1)
             dimV=M.dimension(k-1/2)
@@ -271,6 +273,6 @@ def test_jacobi(index=1,minwt=4,maxwt=100,eps=-1):
             dimJ=dimension_jac_cusp_forms(k,m,1)
             dimV=M.dimension_cusp_forms(k-1/2)
         if dimJ-dimV != 0:
-            print "ERROR: ", k, dimJ, dimV
+            print("ERROR: ", k, dimJ, dimV)
             return False
     return true

@@ -1,81 +1,72 @@
-Finite Quadratic Modules and Simple Lattices
-============================================
+# Finite Quadratic Modules and Simple Lattices
 
-Implementation of several algorithms, tools and supplementary material
-for the article "Lattices with many Borcherds products" 
-by Jan H. Bruinier, S. Ehlen and E. Freitag.
+Algorithms and supplementary material for **Lattices with many Borcherds
+products**, by Jan H. Bruinier, Stephan Ehlen and Eberhard Freitag.
+The extended paper is [included here](bruinier_ehlen_freitag_extended.pdf).
 
-Installation
-============
+## Installation
 
--  A) On your own computer which has sage and git installed:
-   We expect that a current version of sage is installed on your system (see dependencies).
+Use an isolated SageMath environment: this distribution includes the historical
+`psage` dependencies and should not be installed over another PSAGE installation.
 
-   Go to the directory where you would like to download the repository to.
+```sh
+git clone https://github.com/sehlen/sfqm.git
+cd sfqm
+sage -pip install --no-build-isolation .
+```
 
-   You should be able to simply run:
-   ```
-    $ git clone https://github.com/sehlen/sfqm.git
-    $ sage setup.py install
-   ```
+For development, use `sage -pip install --no-build-isolation -e .`.
+The build uses Sage's installed Python, Cython and headers; installing with an
+unrelated system Python is not supported. A C compiler is required. Linux builds
+use OpenMP; other platforms build without that flag and have not been validated.
 
-   Then start sage and try the following:
-   ```
-   sage: from sfqm.fqm.genus_symbol import *
-   sage: s = GenusSymbol('3^+1')
-   sage: s
-   Genus symbol 3^+1
-   sage: s.dimension_cusp_forms(3)
-   0
-   ```
+The modernization branch passes all 20 regression tests in the official
+**Sage 10.10** container and a local conda-forge **Sage 10.7 / Python 3.12**
+environment. The official Sage 10.7 container still fails with a PARI stack
+error; see [issue #5](https://github.com/sehlen/sfqm/issues/5). The historical `master` implementation targeted Sage 7.2
+and cannot be imported unchanged with Python 3.
 
--  B) In the sage math cloud (SMC), http://cloud.sagemath.com:
-   This is a nice possibility to try out the programs
-   if you don't have sage installed.
+The Cython files deliberately retain `language_level=2` to preserve their
+integer-division semantics. The Python files have been ported to Python 3.
 
-   You only have to modify A) a little bit.
-   Instead of the first command you can (in a project of your choice)
-   click on the "+ New" button whcih you use to create a new file.
+## Examples
 
-   Then you insert the url ```https://github.com/sehlen/sfqm.git```
-   in the input field (filename) and click on "From Internet".
+```python
+from sage.all import Integer
+from sfqm.fqm.genus_symbol import GenusSymbol
 
-   Now open a new terminal ("+New" and then "Terminal") and type:
+s = GenusSymbol('3^+1')
+assert s.dimension_cusp_forms(3) == 0
+assert s.dimension_modular_forms(3) == 1
 
-   ```
-    $ cd sfqm
-    $ sage setup.py install --user
-   ```
+# The construction rules in Section 5 of the paper.
+extensions = s.C(2)
+assert all(t.order() == 4*s.order() for t in extensions)
 
-   Now you can test the installation as in A),
-   either on the command line or in a sage worksheet 
-   (you may have to restart the worksheet server in your project).
-   If this does not work, try the following command:
-    
-   ```
-    $ sage setup.py develop --user
-   ```
-   
+# A small anisotropic search: inclusive levels 1 through 24, order <= 24.
+from sfqm.simple.find_simple_c import _find_simple_anisotropic
+simple, elapsed = _find_simple_anisotropic(1, 24, 24, weights=[Integer(4)])
+```
 
-Dependencies
-============
+The parallel wrapper's `num` is the number of levels to search, starting at
+`lower`; its order cap is `lower + num - 1`. This historical API mixes level and
+order bounds. For independent bounds, use the serial worker as above.
 
-- sage: A current version of sage 
-(the implementation has been updated to work with sage 7.2)
+## Verification
 
-- git: if you do not have git installed, you can download the tarball version.
+```sh
+OMP_NUM_THREADS=2 sage -python -m unittest discover -s tests -v
+```
 
-The library dependencies have been included into the release files.
+The suite includes direct enumeration of quadratic-form values and torsion,
+the divisor sum (2.7), the class-number formula, Example 5.1, exact Weil-matrix
+checks, low-weight corrections, and serial/parallel search comparisons.
+`OMP_NUM_THREADS=2` avoids excessive native threading inside forked searches.
 
-The following modules are required and can also be obtained
-separately from my (sehlen) psage fork (use the devel branch).
+The old `test_global.py` files are historical computational notebooks in Python
+form, not an automated regression suite. Some depend on Magma or missing session
+globals; they are outside the supported test command above.
 
-- psage.modules.finite_quadratic_module (N.-P. Skoruppa et. al.)
-- psage.modform.weilrep_tools (S. Ehlen)
-- psage.modules.weil_invariants (S. Ehlen and N.-P. Skoruppa)
-
-
-EXAMPLES
-========
-
-Todo.
+See the [review report](docs/review-2026-10.md) for confirmed defects, changes,
+validation scope and remaining work. Passing these small-case checks is **not a
+reproduction of the complete classification tables**.

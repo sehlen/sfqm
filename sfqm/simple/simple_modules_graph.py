@@ -1,3 +1,4 @@
+import sys
 """
 Tools to compute with finite quadratic modules and simple lattices.
 
@@ -18,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 #from Bsets import dict_to_genus_symbol_string, genus_symbol_string_to_dict, Bbf
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
-from sage.all import ZZ, Zmod, sys, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, log, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
+from sage.all import ZZ, Zmod, parallel, is_prime, colors, cached_function, Integer, Partitions, Set, QQ, RR, log, is_prime_power, next_prime, prime_range, is_squarefree, uniq, MatrixSpace, kronecker, deepcopy, CC, exp, walltime, RealField, floor, pari, pi, ComplexField, sqrt, text, arrow, is_even, squarefree_part, polygon2d, line2d
 from sage.parallel.decorate import *
 from sage.misc.cachefunc import *
 import itertools
@@ -194,7 +195,7 @@ class SimpleModulesGraph(DiGraph):
             computations = self._compute_simple_modules_graph_from_startpoint_parallel([(a, p, cut_nonsimple_aniso, fast) for a in points])
             for r in computations:
                 if not isinstance(r[1], SimpleModulesGraph):
-                    logger.error("Got something else... {0}".format(r))
+                    raise RuntimeError("Graph worker failed: {0}".format(r))
                     # print r
                 else:
                     G = r[1]
@@ -206,12 +207,12 @@ class SimpleModulesGraph(DiGraph):
                         self._nonsimple_color] += G._vertex_colors[G._nonsimple_color]
                     self._vertex_colors[
                         self._simple_color] += G._vertex_colors[G._simple_color]
-                    self._simple = uniq(self._simple + G._simple)
-                    for h in G._heights.keys():
-                        if not self._heights.has_key(h):
+                    self._simple = list(uniq(self._simple + G._simple))
+                    for h in list(G._heights.keys()):
+                        if h not in self._heights:
                             self._heights[h] = G._heights[h]
                         else:
-                            self._heights[h] = uniq(self._heights[h] + G._heights[h])
+                            self._heights[h] = list(uniq(self._heights[h] + G._heights[h]))
                             logger.info("Found {0} {1}-simple module{2} so far.".format(
                                 len(self._simple), self._weight, "s" if len(self._simple) != 1 else ""))
         logger.info("Found in total {0} {1}-simple module{3} with p-rank <= {2}".format(
@@ -267,7 +268,7 @@ class SimpleModulesGraph(DiGraph):
                     break
             while prime_pol(s, p, k) <= self._bound or p in slp:
                 p = next_prime(p)
-            p = uniq(prime_range(p) + slp)
+            p = list(uniq(prime_range(p) + slp))
         logger.info("Starting with s = {0} and primes = {1}".format(s, p))
         
         if isinstance(p, list):
@@ -304,14 +305,14 @@ class SimpleModulesGraph(DiGraph):
                         break
                 if fs:
                     np.append(p)
-        primes = np
+            primes = np
         # print "here", primes
         logger.info("primes for graph for {0}: {1}".format(s, primes))
         # if len(primes) == 0:
         #    return
         heights = self._heights
         h = 0
-        if not heights.has_key(h):
+        if h not in heights:
             heights[h] = [s]
         else:
             if heights[h].count(s) == 0:
@@ -334,7 +335,7 @@ class SimpleModulesGraph(DiGraph):
         ###################################################
         while simple:
             h = h + 1
-            if not heights.has_key(h):
+            if h not in heights:
                 heights[h] = list()
             # the list Bss will contain the k-simple modules of the next height level
             # recall that Bs contains the modules of the current height level
@@ -350,7 +351,7 @@ class SimpleModulesGraph(DiGraph):
                     # check if we really need to check p for s1
                     # otherwise none of the fqm's in s1.C(p) are simple
                     # and we will not consider them.
-                    if prime_pol(s1.genus_symbol(), p, k) <= self._bound:
+                    if (6 * s1.genus_symbol().level()) % p == 0 or prime_pol(s1.genus_symbol(), p, k) <= self._bound:
                         Bs2 = Bs2 + s1.genus_symbol().C(p, False)
                     else:
                         logger.info(
@@ -409,6 +410,8 @@ class SimpleModulesGraph(DiGraph):
             logger.info("checks = {0}".format(checks))
             for check in checks:
                 s2 = check[0][0][0]
+                if not isinstance(check[1], bool):
+                    raise RuntimeError("Dimension worker failed: {0}".format(check))
                 if check[1]:
                     simple = True
                     logger.info(
@@ -421,7 +424,7 @@ class SimpleModulesGraph(DiGraph):
                         vertex_colors[nonsimple_color].append(s2)
             Bs = Bss
         simple = [v.genus_symbol() for v in vertex_colors[simple_color]]
-        self._simple = uniq(simple)
+        self._simple = list(uniq(simple))
 
     @options()
     def plot(self, textvertices=False, only_simple=False, fontsize=18, sort=False, fact = 0.5, thickness=4, edges_thickness=4, arrowshorten=8,
@@ -451,14 +454,14 @@ class SimpleModulesGraph(DiGraph):
         min_d = 0.5
         widths = [float(sum([len(str(v)) / float(6) + min_d for v in heights[i]]))
                   for i in range(len(heights))]
-        print widths
+        print(widths)
         max_w = max(widths)
         if len(widths) > 1:
             min_w = min([w for w in widths if w > 3])
         else:
             min_w = 0
-        print min_w, max_w, widths
-        max_vert = max([len(_) for _ in heights.values()])
+        print(min_w, max_w, widths)
+        max_vert = max([len(_) for _ in list(heights.values())])
         for i in range(len(heights)):
             if sort:
                 heights[i] = sorted(heights[i])
@@ -468,8 +471,8 @@ class SimpleModulesGraph(DiGraph):
             next_w = min_w if i == len(heights) - 1 else widths[i + 1]
             cur_w = max(float(next_w) * 0.9, float(prev_w) * 0.9, real_w)
             d = max(2 * float(cur_w - real_w) / len(heights[i]), min_d)
-            print real_w, cur_w
-            print "d = ", d
+            print(real_w, cur_w)
+            print("d = ", d)
             p = [-(cur_w), float(max_vert) * fact * i]
             w = 0
             for j in range(len(heights[i])):
@@ -486,7 +489,7 @@ class SimpleModulesGraph(DiGraph):
                     ct = colors.white.rgb()
                 labels.append(
                     text("$\mathbf{" + str(v)[1:len(str(v))-1] + "}$", (p[0] + 0.2, p[1]), rgbcolor=ct, zorder=8, fontsize=fontsize))
-                print w
+                print(w)
                 if textvertices:
                     P = line2d([[p[0] - w, p[1] - 0.9], [p[0] - w, p[1] + 1.1]], rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
                     P += line2d([[p[0] - w, p[1] + 1.1], [p[0] + w + 0.2, p[1] + 1.1]], rgbcolor=c, thickness=thickness,  linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple)
@@ -499,7 +502,7 @@ class SimpleModulesGraph(DiGraph):
         for e in self.edges():
             v = e[0]
             if not self.has_vertex(e[0]) or not self.has_vertex(e[1]):
-                print "deleting edge ", e
+                print("deleting edge ", e)
                 self.delete_edge(e[0], e[1])
             else:
                 c = simple_color if vertex_colors[
@@ -509,7 +512,7 @@ class SimpleModulesGraph(DiGraph):
                              1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9], rgbcolor=c, zorder=-1, arrowsize=arrowsize, arrowshorten=arrowshorten, width=edges_thickness, linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple))
                 else:
                     edges.append(line2d([[pos[e[0]][0], pos[e[0]][1] + 1.1], [pos[e[1]][0], pos[e[1]][1] - 0.9]], rgbcolor=c, zorder=-1, thickness=edges_thickness, linestyle=linestyle_simple if c == simple_color else linestyle_nonsimple))
-        print "calculation ended"
+        print("calculation ended")
         gp = self.graphplot(dpi=300, pos=pos, vertex_size=2050, figsize=round(
             float(max_vert) * 1.5), vertex_colors=vertex_colors)
         gp._plot_components['vertex_labels'] = labels
@@ -537,7 +540,7 @@ class SimpleModulesGraph(DiGraph):
         '''
         primes = self._primes
         if h != None:
-            if not self._heights.has_key(h - 1):
+            if h - 1 not in self._heights:
                 return False
             else:
                 verts = self._heights[h - 1]
@@ -654,7 +657,7 @@ def test_a5prime_formula(upper=100, lower=1):
             a = s.a5prime()
             b = s.a5prime_formula()
             if not abs(a - b) < 1e-10:
-                print s, a, b
+                print(s, a, b)
 
 
 def gaussum(n, N, prec=53):
@@ -675,7 +678,7 @@ def test_dimension_jacobi(N, k):
     s = GenusSymbol(M.jordan_decomposition().genus_symbol())
     dv = s.dimension_cusp_forms(k, reduction=True)
     if not dj == dv:
-        print "Error: ", N, dj, dv
+        print("Error: ", N, dj, dv)
         return False
     return True
 
@@ -696,7 +699,7 @@ def dict_to_latex_table(d, n=None, max_per_table=10, midrules=False):
     endstr = r"\bottomrule\end{tabularx}\end{table}" + "\n"
     s = beginstr
     dk = sorted(d.keys())
-    for i in range(len(d.keys())):
+    for i in range(len(list(d.keys()))):
         N = dk[i]
         if len(d[N]) == 0:
             continue
@@ -726,9 +729,9 @@ def aniso_dict_to_latex_table(d, max_per_table=10, include_weight=True):
     endstr = r"\bottomrule\end{tabularx}" + "\n"
     s = beginstr
     ks = sorted(d.keys())
-    for i in range(len(d.keys())):
+    for i in range(len(list(d.keys()))):
         k = ks[i]
-        sigs = uniq([_.signature() for _ in d[k]])
+        sigs = list(uniq([_.signature() for _ in d[k]]))
         for sig in sigs:
             if include_weight:
                 s += "$" + str(k) + "$" + " & "
@@ -751,9 +754,9 @@ def aniso_dict_to_latex_table(d, max_per_table=10, include_weight=True):
 def is_quotient(M, sym, rank):
     symbol = GenusSymbol_global_ring(MatrixSpace(ZZ, rank, rank).one())
     symbol._local_symbols = [
-        Genus_Symbol_p_adic_ring(p, syms) for p, syms in sym.iteritems()]
+        Genus_Symbol_p_adic_ring(p, syms) for p, syms in sym.items()]
     s = get_symbol_string(symbol)
-    print s
+    print(s)
     N = FiniteQuadraticModule(s)
     t = N.order() / M.order()
     if not Integer(t).is_square():
@@ -769,7 +772,7 @@ def is_quotient(M, sym, rank):
         if G.order() == t and G.is_isotropic():
             Q = G.quotient()
             if Q.is_isomorphic(M):
-                print Q
+                print(Q)
                 return N
             else:
                 del Q
@@ -784,8 +787,8 @@ def Bbf(M, m):  # brute force algorithm
     sign = M.signature()
     symbols = all_symbols(sign, rank, M.order() * m ** 2)
     B = list(is_quotient([(M, sym, rank) for sym in symbols]))
-    B = filter(lambda x: x[1] != False, B)
-    B = map(lambda x: x[1], B)
+    B = [x for x in B if x[1] != False]
+    B = [x[1] for x in B]
     modules = Set(B)
     modules_unique = list()
     for M in modules:
@@ -819,7 +822,7 @@ def all_symbols(sign, rank, D):
             # print "partition:", vs
             ell = list()
             if p == 2:
-                for vv, mult in vs.iteritems():
+                for vv, mult in vs.items():
                     ll = list()
                     for t in [0, 1]:  # even(0) or odd(1) type
                         for det in [1, 3, 5, 7]:  # the possible determinants
@@ -840,11 +843,11 @@ def all_symbols(sign, rank, D):
                                     ll.append([vv, mult, det, 1, oddity])
                     ell.append(ll)
             else:
-                for vv, mult in vs.iteritems():
+                for vv, mult in vs.items():
                     ll = [[vv, mult, 1], [vv, mult, -1]]
                     ell.append(ll)
             l = list(itertools.product(*ell))
-            l = map(lambda x: {p: list(x)}, l)
+            l = [{p: list(x)} for x in l]
             psymbols = psymbols + l
         if len(symbols) == 0:
             symbols = psymbols
@@ -899,7 +902,7 @@ def ModulesForSingularWeight(n, aniso_level_limit, bound=1, **kwds):
         if splits:
             ll.append((str(s), N, s.dimension_cusp_forms((2+n)/2)))
     if len(l) == len(ll):
-        print "All symbols are global and split a scaled hyperbolic plane"
+        print("All symbols are global and split a scaled hyperbolic plane")
     else:
-        print "{1}/{0} symbols split are global and a scaled hyperbolic plane".format(len(l), len(ll))
+        print("{1}/{0} symbols split are global and a scaled hyperbolic plane".format(len(l), len(ll)))
     return ll

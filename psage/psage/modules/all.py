@@ -1,2 +1,2 @@
-from finite_quadratic_module import FiniteQuadraticModule,FiniteQuadraticModule
+from .finite_quadratic_module import FiniteQuadraticModule,FiniteQuadraticModule
 from psage.external.weil_invariants.weil_invariants import cython_invariants, invariants, cython_invariants_matrices, cython_invariants_dim
