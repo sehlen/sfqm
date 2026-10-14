@@ -527,7 +527,7 @@ cpdef cython_invariants(FQM, use_reduction = True, proof = False, checks = False
     
     t = walltime()
     # Generic elimination avoids a PARI stack-conversion failure in Sage 10.7.
-    X = U.right_kernel(algorithm="generic" if K.characteristic() == 0 else "default")
+    X = U.right_kernel(algorithm="generic") if K.characteristic() == 0 else U.right_kernel()
     if debug > 0:
         print '%f: kernel'%(walltime(t))
         print "dimension kernel: {0}".format(X.dimension())
