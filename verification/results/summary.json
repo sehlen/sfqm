@@ -1,0 +1,118 @@
+{
+  "runs": [
+    {
+      "file": "closure_n2.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 70,
+      "seconds": 342.038,
+      "error": null
+    },
+    {
+      "file": "closure_n3.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 16,
+      "seconds": 8.516,
+      "error": null
+    },
+    {
+      "file": "closure_n4.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 6,
+      "seconds": 4.414,
+      "error": null
+    },
+    {
+      "file": "closure_n5.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 4,
+      "seconds": 0.982,
+      "error": null
+    },
+    {
+      "file": "closure_n6.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 5,
+      "seconds": 0.982,
+      "error": null
+    },
+    {
+      "file": "closure_n7.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 2,
+      "seconds": 0.771,
+      "error": null
+    },
+    {
+      "file": "closure_n8.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 3,
+      "seconds": 2.087,
+      "error": null
+    },
+    {
+      "file": "closure_n9.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 3,
+      "seconds": 0.362,
+      "error": null
+    },
+    {
+      "file": "table5_entries.json",
+      "completed": true,
+      "passed": true,
+      "entries": 79,
+      "found": 0,
+      "seconds": 7.205,
+      "error": null
+    },
+    {
+      "file": "table7_entries.json",
+      "completed": true,
+      "passed": true,
+      "entries": 70,
+      "found": 0,
+      "seconds": 36.053,
+      "error": null
+    },
+    {
+      "file": "table8_entries.json",
+      "completed": true,
+      "passed": true,
+      "entries": 43,
+      "found": 0,
+      "seconds": 0.89,
+      "error": null
+    }
+  ],
+  "table1_accounting": {
+    "2": 67,
+    "3": 15,
+    "4": 5,
+    "5": 3,
+    "6": 4,
+    "7": 2,
+    "8": 3,
+    "9": 3,
+    "10": 2,
+    "18": 1,
+    "26": 1,
+    "1": 256
+  },
+  "total_conditional_on_proposition_6_2": 362
+}

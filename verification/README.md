@@ -18,7 +18,8 @@ Entry jobs cover Tables 4 (75), 5 (79 weight/symbol pairs), 7 (70), 8 (43),
 9 (169), and the 90 cyclic modules listed on page 25. The manifests include
 signatures, rank bounds, and expected global realizability where applicable.
 The exact dimension expression uses QQbar and refuses to round a noninteger.
-Weight 2 and 3/2 corrections use characteristic-zero invariant computations.
+Weight 2 and 3/2 corrections first use good-reduction upper bounds to certify
+zero; inconclusive cases fall back to characteristic-zero invariant computations.
 The character/value routines and invariant implementation are shared with the
 library, so this is not an independent implementation of all underlying math.
 
@@ -50,3 +51,20 @@ row counts; mathematical verification separately checks each entry.
 The first local attempt checked Table 8 and reproduced its n=3 closure, but
 workspace maintenance removed those unpublished result files. The durable CI
 runs are the recorded evidence for this verification branch.
+
+## Why reduction can certify zero
+
+Let b be the exactly computed virtual cusp dimension, and c the nonnegative
+low-weight correction. The desired dimension is b+c. After reduction at a
+splitting prime coprime to the level and group order, the rank of the invariant
+equations cannot increase, so the computed correction u satisfies c <= u.
+The +/- eigenspaces in the weight-one-half correction obey the same bound
+since the residue characteristic is odd. Consequently b+u=0, together with
+nonnegativity of the true dimension, proves b+c=0. This is a zero certificate,
+not a general assertion that modular and characteristic-zero kernels agree.
+When b+u>0 the verifier computes the exact characteristic-zero correction.
+A negative b+u raises an error. Each entry records which method certified it.
+
+The original all-characteristic-zero run remains available separately; the
+follow-up workflow targets the slower weight-3/2 jobs. Full entry and closure
+commands for other tables remain available through the script.

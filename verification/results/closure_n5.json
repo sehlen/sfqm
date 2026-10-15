@@ -1,0 +1,37 @@
+{
+  "sage_version": "10.10",
+  "python": "3.12.3",
+  "arithmetic": "QQbar and exact characteristic-zero invariant kernels",
+  "complete": true,
+  "results": [],
+  "n": 5,
+  "weight": "7/2",
+  "primes": [
+    2,
+    3,
+    5,
+    7,
+    11,
+    13
+  ],
+  "seeds": [
+    "4_5^-1"
+  ],
+  "seed_level_limit_exclusive": 0,
+  "completeness": "Closure conditional on completeness of the paper anisotropic seed lists; no independent full-bound seed exclusion.",
+  "elapsed_seconds": 0.9815775430000002,
+  "found": [
+    "4_5^-1",
+    "2^+2.4_5^-1",
+    "2^+4.4_5^-1",
+    "2^+6.4_5^-1"
+  ],
+  "processed": 4,
+  "candidates": 75,
+  "missing": [],
+  "extra": [],
+  "global_genus_count": 3,
+  "github_job_id": 116258560048,
+  "github_run_id": 38685267716,
+  "code_commit": "8f66aadca8cb7b5bdd503b5e79ec16da9b1a7257"
+}
