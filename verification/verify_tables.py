@@ -4,6 +4,8 @@ Run using Sage's Python, from outside the repository after installing its wheel.
 See README.md for the distinction between entry checks and completeness.
 """
 import argparse
+import gc
+import resource
 import hashlib
 import json
 import platform
@@ -11,10 +13,10 @@ import time
 from pathlib import Path
 from sage.all import QQ, ZZ, QQbar, prime_range
 from sage.env import SAGE_VERSION
-from sfqm.fqm.genus_symbol import GenusSymbol, anisotropic_symbols
+from sfqm.fqm.genus_symbol import GenusSymbol, anisotropic_symbols, C
 from psage.modules.finite_quadratic_module import FiniteQuadraticModule
 from psage.external.weil_invariants.weil_invariants import cython_invariants_dim
-from psage.modform.weilrep_tools.weight_one_half import weight_one_half_dim
+from psage.modform.weilrep_tools.weight_one_half import weight_one_half_dim, invariants_eps
 
 ROOT = Path(__file__).resolve().parent
 
@@ -178,6 +180,9 @@ def main():
                 g = found[index]
                 index += 1
                 for p in primes:
+                    out['active_parent'] = str(g)
+                    out['active_prime'] = int(p)
+                    save()
                     for h in g.C(p):
                         key = str(h)
                         if key in seen or h.max_rank() > n+2:
@@ -185,6 +190,15 @@ def main():
                         seen.add(key)
                         if simple(h, k):
                             unique_add(found, h)
+                    # C's global cache retains rejected modules together with
+                    # their large cached value distributions. Do not retain
+                    # those across the search. Likewise bound local invariant
+                    # caches; accepted modules are kept in found explicitly.
+                    C.clear_cache()
+                    weight_one_half_dim.clear_cache()
+                    invariants_eps.clear_cache()
+                    gc.collect()
+                out['peak_rss_kib'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
                 out.update(found=[str(h) for h in found], processed=index, candidates=len(seen))
                 save()
                 print('PROGRESS', n, index, len(found), len(seen), flush=True)
