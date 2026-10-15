@@ -5,7 +5,7 @@ recorded as machine-readable JSON with the Sage version, code commit, job/run
 IDs, elapsed computation time, and entry-by-entry checks or missing/extra lists.
 Master remains unchanged. This verification is proposed in PR #6 atop PR #4.
 
-## Completed characteristic-zero checks
+## Completed checks
 
 The first run is [38685267716](https://github.com/sehlen/sfqm/actions/runs/38685267716).
 
@@ -17,10 +17,31 @@ The first run is [38685267716](https://github.com/sehlen/sfqm/actions/runs/38685
 - The completed higher-weight closures agree by isomorphism class, not merely
   by count; see the individual `results/closure_n*.json` files.
 
-The weight-3/2 entry checks and closure are being rerun with good-reduction
-zero certificates in [38686028123](https://github.com/sehlen/sfqm/actions/runs/38686028123).
-The original characteristic-zero-only jobs are retained for comparison.
-No uncompleted job is counted as a successful verification.
+The good-reduction certificate run
+[38686028123](https://github.com/sehlen/sfqm/actions/runs/38686028123) additionally
+verifies every weight-3/2 entry. All **526 printed entries / weight-module
+pairs pass**, including every listed bracket marking.
+
+| Dataset | Entries | Computation seconds | Method |
+| --- | ---: | ---: | --- |
+| Table 4 | 75 | 39.10 | Exact virtual dimensions + good-reduction zero certificates |
+| Table 5 | 79 | 7.20 | Exact algebraic / characteristic-zero calculation |
+| Table 7 | 70 | 36.05 | Exact algebraic / characteristic-zero calculation |
+| Table 8 | 43 | 0.89 | Exact algebraic calculation |
+| Table 9 | 169 | 130.37 | Exact virtual dimensions + good-reduction zero certificates |
+| Cyclic family | 90 | 64.15 | Exact virtual dimensions + good-reduction zero certificates |
+
+Times exclude installation/container startup. Jobs use OMP_NUM_THREADS=1 in
+Sage 10.10 on ordinary GitHub-hosted runners, with independent jobs parallelized.
+The individual entry checks do not require an HPC cluster.
+All low-weight certificate rows record the exact virtual dimension and the
+finite-field upper bound; none required characteristic-zero fallback.
+
+Every n>=2 closure requested has completed with no missing or extra classes,
+including n=10,18,26. These searches use characteristic-zero calculations and
+no numerical or dynamic prime pruning. The n=1 closure remains in progress as
+of this results checkpoint. The original characteristic-zero-only low-weight
+jobs are retained for comparison. No uncompleted job is counted as successful.
 
 ## Meaning and limits
 

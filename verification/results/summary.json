@@ -1,12 +1,39 @@
 {
   "runs": [
     {
+      "file": "closure_n10.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 2,
+      "seconds": 0.198,
+      "error": null
+    },
+    {
+      "file": "closure_n18.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 1,
+      "seconds": 0.106,
+      "error": null
+    },
+    {
       "file": "closure_n2.json",
       "completed": true,
       "passed": true,
       "entries": 0,
       "found": 70,
       "seconds": 342.038,
+      "error": null
+    },
+    {
+      "file": "closure_n26.json",
+      "completed": true,
+      "passed": true,
+      "entries": 0,
+      "found": 1,
+      "seconds": 0.114,
       "error": null
     },
     {
@@ -73,6 +100,15 @@
       "error": null
     },
     {
+      "file": "table4_entries.json",
+      "completed": true,
+      "passed": true,
+      "entries": 75,
+      "found": 0,
+      "seconds": 39.099,
+      "error": null
+    },
+    {
       "file": "table5_entries.json",
       "completed": true,
       "passed": true,
@@ -97,6 +133,24 @@
       "entries": 43,
       "found": 0,
       "seconds": 0.89,
+      "error": null
+    },
+    {
+      "file": "table9_entries.json",
+      "completed": true,
+      "passed": true,
+      "entries": 169,
+      "found": 0,
+      "seconds": 130.37,
+      "error": null
+    },
+    {
+      "file": "tablecyclic_entries.json",
+      "completed": true,
+      "passed": true,
+      "entries": 90,
+      "found": 0,
+      "seconds": 64.149,
       "error": null
     }
   ],
