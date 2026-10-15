@@ -1,0 +1,562 @@
+[
+  {
+    "symbol": "1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.9^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.9^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+4.9^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+4",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_0^+2.5^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "3^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "3^+4",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "3^-1.7^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_0^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_0^+4",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.4^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.4^-2",
+    "global": false,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_0^+2.4^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4^-4",
+    "global": false,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4^+4",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_1^+1.4_1^+1.3^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4_2^-2.3^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "5^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "5^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "5^-3",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "5^+4",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "25^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "25^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.3^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+4.3^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.3^+4",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "3^+1.27^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "7^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_6^+2.7^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_1^+1.4_7^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4_0^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_1^+3.4_7^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.4_0^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "8^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.8^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4_7^+1.16_1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "9^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "9^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "3^-2.9^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "9^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "3^+1.11^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^-2.5^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.5^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+4.5^-1",
+    "global": false,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^-4.5^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2^+2.5^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_0^+2.9^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_2^+2.3^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_6^+2.3^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_0^+2.3^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_6^+4.3^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_6^+2.3^+3",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4^+2.3^-2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "9^+1.5^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "13^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_3^-1.8_3^-1.3^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_7^+1.8_1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_5^-1.8_3^-1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "4_7^+1.8_1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_7^+3.8_1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "8_0^+2",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_7^+1.4^+2.8_1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "49^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "17^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_6^+2.3^+1.5^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  },
+  {
+    "symbol": "2_7^+1.32_1^+1",
+    "global": true,
+    "k": "2",
+    "signature": 0,
+    "rank_limit": 4,
+    "n": 2
+  }
+]

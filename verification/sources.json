@@ -1,0 +1,6 @@
+{
+  "tex_url": "https://arxiv.org/src/1408.4148v1",
+  "tex_sha256": "a6eb3c9ea9c23283e11308872f9db8c0aca9f609aa39650b0626fc044507498f",
+  "pdf_sha256": "e847f4cfea6092892bb3f93d85a2a474b4ae24170558a6973251e95ad86117ae",
+  "note": "Tables 4,5,7 from v1 TeX; Table 8 manually transcribed; Table 9 extracted from bundled extended PDF."
+}
