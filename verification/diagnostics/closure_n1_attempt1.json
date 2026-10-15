@@ -1,0 +1,11 @@
+{
+  "run_id": 38686028123,
+  "job_id": 116260943443,
+  "exit_code": 137,
+  "status": "killed; not complete",
+  "last_logged_processed": 15,
+  "last_logged_candidates": 928,
+  "last_logged_accepted": 69,
+  "checkpoint_artifact": "https://github.com/sehlen/sfqm/actions/runs/38686028123/artifacts/11950381857",
+  "interpretation": "Consistent with memory exhaustion; unbounded global construction caches identified and bounded in replacement run."
+}

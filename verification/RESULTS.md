@@ -39,8 +39,13 @@ finite-field upper bound; none required characteristic-zero fallback.
 
 Every n>=2 closure requested has completed with no missing or extra classes,
 including n=10,18,26. These searches use characteristic-zero calculations and
-no numerical or dynamic prime pruning. The n=1 closure remains in progress as
-of this results checkpoint. The original characteristic-zero-only low-weight
+no numerical or dynamic prime pruning. The n=1 closure attempt in run 38686028123 was killed with exit 137 after
+15 processed parents / 928 distinct candidates (69 accepted classes at that
+checkpoint), consistent with memory exhaustion. The global C cache retained
+rejected modules and their value distributions. The verifier now clears these
+and the low-weight invariant caches between prime extensions and records peak
+resident memory; a [replacement run](https://github.com/sehlen/sfqm/actions/runs/38686926551) is in progress. No completed n=1 closure
+result is claimed. The original characteristic-zero-only low-weight
 jobs are retained for comparison. No uncompleted job is counted as successful.
 
 ## Meaning and limits
