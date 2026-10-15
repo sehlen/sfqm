@@ -57,12 +57,39 @@ def exact_dimension(g, k, correct=True):
     return ZZ(result)
 
 
+def certified_dimension(g, k):
+    """Certify zero with a good-reduction upper bound, otherwise compute exactly.
+
+    At primes not dividing the level or the group order, reduction of the
+    integral Weil-invariant equations cannot increase rank. Kernel dimensions
+    (including the +/- eigenspaces used in weight 1/2) therefore give upper
+    bounds for the characteristic-zero correction. If virtual+upper=0,
+    nonnegativity of cusp dimensions forces equality and proves dimension zero.
+    The native routines choose splitting primes congruent to 1 modulo 4 and
+    the relevant level, hence prime to all denominators and to 2.
+    """
+    k = QQ(k)
+    virtual = exact_dimension(g, k, correct=False)
+    if k not in (QQ(3)/2, QQ(2)):
+        return virtual, {'method': 'exact_algebraic'}
+    fqm = g.finite_quadratic_module()
+    upper = (cython_invariants_dim(fqm, True, proof=False) if k == 2 else
+             weight_one_half_dim(fqm, True, proof=False))
+    if virtual + upper < 0:
+        raise ArithmeticError(('negative certified upper bound', str(g), virtual, upper))
+    if virtual + upper == 0:
+        return ZZ(0), {'method': 'good_reduction_zero_certificate',
+                       'virtual_dimension': int(virtual), 'correction_upper_bound': int(upper)}
+    return exact_dimension(g, k), {'method': 'exact_characteristic_zero_fallback',
+                                  'virtual_dimension': int(virtual), 'correction_upper_bound': int(upper)}
+
+
 def simple(g, k):
     # The correction is nonnegative; positive virtual dimension is a certified
     # exclusion, with no expensive invariant calculation needed.
     if exact_dimension(g, k, correct=False) > 0:
         return False
-    return exact_dimension(g, k) == 0
+    return certified_dimension(g, k)[0] == 0
 
 
 def unique_add(items, g):
@@ -81,7 +108,7 @@ def main():
     args = ap.parse_args()
     start = time.monotonic()
     out = {'sage_version': SAGE_VERSION, 'python': platform.python_version(),
-           'arithmetic': 'QQbar and exact characteristic-zero invariant kernels',
+           'arithmetic': 'QQbar, good-reduction zero certificates, characteristic-zero fallback',
            'complete': False, 'results': []}
     def save():
         out['elapsed_seconds'] = time.monotonic()-start
@@ -100,7 +127,8 @@ def main():
             for entry in entries:
                 g = module(entry)
                 print('CHECK', args.entries, str(g), entry['k'], flush=True)
-                row = dict(entry, symbol=str(g), dimension=int(exact_dimension(g, QQ(entry['k']))),
+                dim, certificate = certified_dimension(g, QQ(entry['k']))
+                row = dict(entry, certificate=certificate, symbol=str(g), dimension=int(dim),
                            actual_signature=int(g.signature()), actual_rank=int(g.max_rank()), actual_level=int(g.level()))
                 row['pass'] = row['dimension'] == 0 and row['actual_signature'] == entry['signature']
                 if 'level' in entry:
