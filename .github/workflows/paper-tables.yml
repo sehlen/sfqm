@@ -1,0 +1,60 @@
+name: Paper table verification
+on:
+  push:
+    branches: ['review/paper-table-verification']
+    paths: ['verification/**', '.github/workflows/paper-tables.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  entries:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        table: ['4', '9', 'cyclic']
+    container:
+      image: sagemath/sagemath:10.10
+      options: --user root
+    env:
+      OMP_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - run: sage -pip install --no-build-isolation .
+      - name: Verify every printed entry exactly
+        run: |
+          cd /tmp
+          sage -python "$GITHUB_WORKSPACE/verification/verify_tables.py" --entries '${{ matrix.table }}' --output "$GITHUB_WORKSPACE/verification/results/table${{ matrix.table }}_entries.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: table-${{ matrix.table }}-entries
+          path: verification/results/*.json
+  closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        n: [1]
+    container:
+      image: sagemath/sagemath:10.10
+      options: --user root
+    env:
+      OMP_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - run: sage -pip install --no-build-isolation .
+      - name: Compute extension closure from paper seeds
+        run: |
+          cd /tmp
+          sage -python "$GITHUB_WORKSPACE/verification/verify_tables.py" --search '${{ matrix.n }}' --output "$GITHUB_WORKSPACE/verification/results/closure_n${{ matrix.n }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: closure-n${{ matrix.n }}
+          path: verification/results/*.json
